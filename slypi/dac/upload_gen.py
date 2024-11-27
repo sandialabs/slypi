@@ -38,7 +38,7 @@ def parser():
         help="Marking type.  Default: %(default)s")
     parser.add_argument("--model-description", default="", 
         help="New model description.  Default: %(default)s")
-    parser.add_argument("--model-name", default="DAC Model", 
+    parser.add_argument("--model-name", default="SlyPI DAC Model", 
         help="New model name.  Default: %(default)s")
     parser.add_argument("--project-description", default="", 
         help="New project description.  Default: %(default)s")

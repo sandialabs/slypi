@@ -29,7 +29,7 @@ def parse_arguments(list_input=None):
   parser.add_argument("--duplicate-output-count", type=int, default=0, help="Number of output columns to duplicate.  Default: %(default)s")
   parser.add_argument("--input-count", type=int, default=3, help="Input column count.  Default: %(default)s")
   parser.add_argument("--marking", default="mna", help="Marking type.  Default: %(default)s")
-  parser.add_argument("--model-name", default="Random CCA Model", help="New model name.  Default: %(default)s")
+  parser.add_argument("--model-name", default="SlyPI Random CCA Model", help="New model name.  Default: %(default)s")
   parser.add_argument("--output-count", type=int, default=3, help="Output column count.  Default: %(default)s")
   parser.add_argument("--project-name", required=True, help="New project name.")
   parser.add_argument("--row-count", type=int, default=100, help="Row count.  Default: %(default)s")

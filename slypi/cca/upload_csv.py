@@ -25,7 +25,7 @@ def parser():
                       help="New project description.  Default: %(default)s")
   parser.add_argument("--project-name", required=True, 
                       help="New project name.")
-  parser.add_argument("--model-name", default="CCA from CSV", help="New model name.  " + 
+  parser.add_argument("--model-name", default="SlyPI CCA Model", help="New model name.  " + 
                       "Default: %(default)s")
   parser.add_argument("--model-description", default="", help="New model description.  " +
                       "Default: %(default)s")
