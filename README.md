@@ -142,7 +142,7 @@ $ python -m slypi.cca.upload_random.py
 To create a sample CCA model from a CSV file, use:
 
 ```sh
-$ python -m slypi.cca.upload_csv.py slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration
+$ python -m slypi.cca.upload_csv.py slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration --project-name "CCA Models"
 ```
 
 where "slycat-data/cars.csv" is from the slycat-data git repository at
@@ -178,7 +178,7 @@ A Parameter Space model can also  be created from .csv file using the
 ps_csv script.  From the command line, use:
 
 ```sh
-$ python -m slypi.ps.upload_csv slycat-data/cars.csv --input-columns Cylinders Displacement Weight Year --output-columns MPG Horsepower Acceleration
+$ python -m slypi.ps.upload_csv slycat-data/cars.csv --input-columns Cylinders Displacement Weight Year --output-columns MPG Horsepower Acceleration --project-name "PS Models"
 ```
 
 ## Dial-A-Cluster (DAC) Models
@@ -190,7 +190,7 @@ the Slycat user manual.
 To upload a DAC generic .zip file, use
 
 ```sh
-$ dac_upload_gen slycat-data/dial-a-clsuter/weather-dac-gen.zip
+$ dac_upload_gen slycat-data/dial-a-clsuter/weather-dac-gen.zip --project-name "DAC Models"
 ```
 
 This will create a model from a single .zip file containing the appropriate
