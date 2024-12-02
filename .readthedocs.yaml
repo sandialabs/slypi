@@ -10,7 +10,7 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.11"
-  apt-packages:
+  apt_packages:
     - krb5-user
     # You can also specify other tool versions:
     # nodejs: "23"
