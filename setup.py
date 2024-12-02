@@ -70,7 +70,7 @@ setup(
                 "data analysis and visualization server.",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/sandialabs/slycat",
+    url="https://github.com/sandialabs/slypi",
     author="Shawn Martin",
     author_email="smartin@sandia.gov",
     license="Sandia",
