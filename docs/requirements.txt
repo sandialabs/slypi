@@ -1,2 +1,2 @@
 slypi
-krb5-config
+krb5
