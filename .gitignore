@@ -1,3 +1,6 @@
 **/__pycache__/
 **/.DS_Store
 **/docs/build
+build/**
+dist/**
+slypi.egg-info/**
