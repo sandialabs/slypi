@@ -12,7 +12,8 @@ Full documentation can be found in the docs folder and can be compiled using Sph
 $ make html
 ```
 
-The resulting documention can be accessed under build from the file index.html.
+The resulting documention can be accessed under build from the file index.html.  You can also
+read the compiled version at https://slypi.readthedocs.io/en/latest/index.html.
 
 ## Installation
 This code is available at https://pypi.org/projects/slypi and can be installed using
