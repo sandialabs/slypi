@@ -16,7 +16,7 @@ The resulting documention can be accessed under build from the file index.html. 
 read the compiled version at https://slypi.readthedocs.io/en/latest/index.html.
 
 ## Installation
-This code is available at https://pypi.org/projects/slypi and can be installed using
+This code is available at https://pypi.org/project/slypi/ and can be installed using
 
 ```sh
 $ pip install slypi
