@@ -30,6 +30,8 @@ def parser():
     help="Input column names, can't be media columns.")
   parser.add_argument("--output-columns", default=[], nargs="*", 
     help="Output column names, can't be media columns.")
+  parser.add_argument("--categorical-columns", default=[], nargs="*",
+    help="Categorical column names, can't be media coluns.")
 
   # media columns
   parser.add_argument("--media-columns", default=None, nargs="*", 
@@ -95,9 +97,13 @@ def upload_model (arguments, attributes, dimensions, data):
   output_col_inds = [index for index, header in enumerate(column_names) 
     if header in arguments.output_columns and column_types[index] != "string"]
   connection.put_model_parameter(mid, "output-columns", output_col_inds)
+  cat_col_inds = [index for index, header in enumerate(column_names) 
+    if header in arguments.categorical_columns and column_types[index] != "string"]
+  connection.put_model_parameter(mid, "category-columns", cat_col_inds)
   media_col_inds = [index for index, header in enumerate(column_names) 
     if header in arguments.media_columns and column_types[index] == "string"]
   connection.put_model_parameter(mid, "image-columns", media_col_inds)
+
 
   # Signal that we're done uploading data to the model.  This lets Slycat Web
   # Server know that it can start computation.
@@ -150,7 +156,14 @@ def create_model (arguments, log):
       if output_col not in column_names:
         log('Output column "' + output_col + '" not found in input file.')
         raise ValueError('Output column "' + output_col + '" not found in input file.')
-      
+  
+  # check that categorical columns are in headers
+  if arguments.categorical_columns is not None:
+    for cat_col in arguments.categorical_columns:
+      if cat_col not in column_names:
+        log('Categorical column "' + cat_col + '" not found in input file.')
+        raise ValueError('Categorical column "' + cat_col + '" not found in input file.')
+ 
   # check that media-columns are in headers
   if arguments.media_columns is not None:
     for media_col in arguments.media_columns:
@@ -225,6 +238,8 @@ def create_model (arguments, log):
     log('Input columns: ' + str(arguments.input_columns))
   if arguments.output_columns is not None:
     log('Output columns: ' + str(arguments.output_columns))
+  if arguments.categorical_columns is not None:
+    log('Categorical columns: ' + str(arguments.categorical_columns))
   if arguments.media_columns != []:
     log('Media columns: ' + str(arguments.media_columns))
   if arguments.media_hostname is not None:
