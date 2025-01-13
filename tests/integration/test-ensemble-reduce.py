@@ -82,8 +82,8 @@ def init_parser():
     #     help="Do Betti number calculations.")
     parser.add_argument('--test-umap', action="store_true", default=False,
         help="Perform umap reduction on test set.")
-    parser.add_argument('--test-auto-encoder', action="store_true", default=False,
-        help="Do auto-encoder dimension reductions.")
+    # parser.add_argument('--test-auto-encoder', action="store_true", default=False,
+    #     help="Do auto-encoder dimension reductions.")
     parser.add_argument('--test-parallel', action="store_true", default=False,
         help="Run parallel tests.")
     parser.add_argument('--test-restart', action="store_true", default=False,

@@ -92,18 +92,17 @@ def upload_model (arguments, attributes, dimensions, data):
 
   # Store the remaining parameters.
   input_col_inds = [index for index, header in enumerate(column_names) 
-    if header in arguments.input_columns and column_types[index] != "string"]
+    if header in arguments.input_columns]
   connection.put_model_parameter(mid, "input-columns", input_col_inds)
   output_col_inds = [index for index, header in enumerate(column_names) 
-    if header in arguments.output_columns and column_types[index] != "string"]
+    if header in arguments.output_columns]
   connection.put_model_parameter(mid, "output-columns", output_col_inds)
   cat_col_inds = [index for index, header in enumerate(column_names) 
-    if header in arguments.categorical_columns and column_types[index] != "string"]
+    if header in arguments.categorical_columns]
   connection.put_model_parameter(mid, "category-columns", cat_col_inds)
   media_col_inds = [index for index, header in enumerate(column_names) 
-    if header in arguments.media_columns and column_types[index] == "string"]
+    if header in arguments.media_columns]
   connection.put_model_parameter(mid, "image-columns", media_col_inds)
-
 
   # Signal that we're done uploading data to the model.  This lets Slycat Web
   # Server know that it can start computation.
