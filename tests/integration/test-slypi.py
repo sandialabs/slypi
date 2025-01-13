@@ -34,6 +34,12 @@ SLYCAT_CONNECTION = ['--host', 'https://localhost', '--user', 'slycat',
 # test marking for localhost
 TEST_MARKING = ['--marking', 'faculty']
 
+# qual server
+SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos']
+
+# marking for qual
+TEST_MARKING = ['--marking', 'mna']
+
 # testing project name
 TEST_PROJECT = ['--project-name', 'Unit/Integration Testing']
 
@@ -53,6 +59,8 @@ DAC_PCA_FILE = ['example-data/weather-dac-gen-pca.zip']
 PS_CARS_INPUT = ['--input-columns', 'Model', 'Cylinders', 'Displacement', 'Weight',
               'Year', 'Origin']
 PS_CARS_OUTPUT = ['--output-columns', 'MPG', 'Horsepower', 'Acceleration']
+PS_CARS_CATEGORICAL = ['--categorical-columns', 'Cylinders']
+
 CCA_CARS_INPUT = ['--input-columns', 'Cylinders', 'Displacement', 'Weight',
               'Year']
 CCA_CARS_OUTPUT = ['--output-columns', 'MPG', 'Horsepower', 'Acceleration']
@@ -144,7 +152,8 @@ class TestSlypi(unittest.TestCase):
         # create PS model from cars.csv
         ps_parser = ps_csv.parser()
         arguments = ps_parser.parse_args(SLYCAT_CONNECTION + CARS_FILE + PS_CARS_INPUT + 
-                                         PS_CARS_OUTPUT + TEST_MARKING + TEST_PROJECT)
+                                         PS_CARS_OUTPUT + PS_CARS_CATEGORICAL + 
+                                         TEST_MARKING + TEST_PROJECT)
         ps_csv.create_model(arguments, ps_csv.log)
 
     @ignore_warnings

@@ -11,6 +11,9 @@
 import torch
 import torch.multiprocessing as mp
 
+import time
+import warnings
+
 # types of autoencoders
 MODEL_TYPES = ["MLP", "var"]
 
@@ -445,4 +448,72 @@ class AI:
         # number of processors
         self.parser.add_argument("--num-processes", type=int, help="Number of processes to "
             "use for training auto-encoder.")
+        
+    # check parameters for valid values
+    def _check_args(self, args):
+
+        # check for specific auto-encoder arguments
+        if args.algorithm == "auto-encoder":
+
+            # check epochs >= 1
+            if args.epochs is not None:
+                if args.epochs < 1:
+                    self.log.error("Epochs must be >= 1.")
+                    raise ValueError("epochs must be >= 1.")
+            
+            # check batch-siae >= 1
+            if args.batch_size is not None:
+                if args.batch_size < 1:
+                    self.log.error("Batch size must be >= 1.")
+                    raise ValueError("batch size must be >= 1.")
+
+            # check number of process is >= 1
+            if args.num_processes is not None:
+                if args.num_processes < 1:
+                    self.log.error("Number of processes must be >= 1.")
+                    raise ValueError("number of prodesses must be >= 1.")
+
+            # check that MLP layer sizes are >= 1
+            if args.MLP_arch is not None:
+                for layer_size in args.MLP_arch:
+                    if layer_size < 1:
+                        self.log.error("MLP architecture layer sizes must be >= 1.")
+                        raise ValueError("MLP architecture layer sizes must be >= 1.") 
+                    
+    # set parameters using arguments
+    def _set_parms(self, args):
+
+        # auto-encoder arguments
+        if args.model_type is None:
+            self.model_parms["model_type"] = MODEL_TYPES[0]
+        else:
+            self.model_parms["model_type"] = args.model_type
+        self.model_parms["epochs"] = args.epochs
+        self.model_parms["batch_size"] = args.batch_size
+        self.model_parms["num_processes"] = args.num_processes
+
+
+    # add particular algorithm to end of model list
+    def _init_algorithm(self, num_dim):
+
+        if self.model_parms["algorithm"] == "auto-encoder":
+            self.model.append(AutoEncoder(self.log, num_dim = num_dim,
+                                          model_type=self.model_parms["model_type"],
+                                          epochs=self.model_parms["epochs"],
+                                          batch_size = self.model_parms["batch_size"],
+                                          num_processes=self.model_parms["num_processes"]))
+            
+    # perform incremental dimension reduction
+    def partial_fit(self, data, time_step=0):
+        """
+        Train an incremental model using samples.
+
+        Args:
+            data (array): data with points as rows
+            time_step (int): model time step
+        """
+
+        if self.model_parms["algorithm"] == "auto-encoder":
+            self.model[time_step].fit(data)
+        
         
