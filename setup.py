@@ -84,7 +84,7 @@ setup(
                       "numpy", "scikit-learn", 
                       "pandas", "meshio", "imageio[ffmpeg]",
                       "matplotlib", "ipyparallel",
-                      "torch", "umap-learn", "pymks"],
+                      "umap-learn", "pymks"],
     entry_points={
         "console_scripts": [
             "ps_upload_csv=slypi.ps.upload_csv:main",
