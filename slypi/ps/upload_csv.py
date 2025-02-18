@@ -96,8 +96,12 @@ def upload_model (arguments, attributes, dimensions, data):
     pid = arguments.project_id
 
   # create the new, empty model.
-  mid = connection.post_project_models(pid, "parameter-image", 
-    arguments.model_name, arguments.marking, arguments.model_description)
+  try:
+    mid = connection.post_project_models(pid, "parameter-image", 
+      arguments.model_name, arguments.marking, arguments.model_description)
+  except Exception as e:
+    log('Could not create a new model: is project id correct?', debug=arguments.debug,
+      exception_type=Exception)
 
   # Upload our observations as "data-table".
   connection.put_model_arrayset(mid, "data-table")
