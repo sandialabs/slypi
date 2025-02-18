@@ -1394,8 +1394,7 @@ class Connection(object):
                 if project["name"] == name]
     
     if len(projects) > 1:
-      log.error("slypi.__init__.py find_or_create_project", 
-        "More than one project matched the given name. Try using a " +
+      log.error("More than one project matched the given name. Try using a " +
         "different project name instead.")
       raise Exception("More than one project matched the given name. " +
         "Try using a different project name instead.")

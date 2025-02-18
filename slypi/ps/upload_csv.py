@@ -7,6 +7,7 @@
 
 import os
 import re
+import sys
 
 import numpy as np
 
@@ -50,14 +51,29 @@ def parser():
       help="New model name.  Default: %(default)s")
   parser.add_argument("--project-description", default="", 
       help="New project description.  Default: %(default)s")
-  parser.add_argument("--project-name", required=True, 
-      help="New project name.")
+  
+  # require either project name or project ID
+  group = parser.add_mutually_exclusive_group(required=True)
+  group.add_argument("--project-name", help="Project name (will create if doesn't exist).")
+  group.add_argument("--project-id", help="Project ID.")
+
+  # debug mode prints full stack trace
+  parser.add_argument("--debug", action="store_true")
 
   return parser
 
 # logging is just printing to the screen
-def log (msg):
+# in case of failure exit gracefully unless in debug mode
+def log (msg, debug=False, exception_type=None):
+    
     print(msg)
+
+    if exception_type:
+
+      if debug:
+        raise exception_type(msg)
+      else:
+        sys.exit(1)
 
 # create PS model, arguments include the command line connection parameters
 # and project/model information
@@ -65,13 +81,19 @@ def upload_model (arguments, attributes, dimensions, data):
 
   # get column names/types
   column_names = [attribute["name"] for attribute in attributes]
-  column_types = [attribute["type"] for attribute in attributes]
 
   # setup a connection to the Slycat Web Server.
   connection = slypi.connect(arguments)
 
   # create a new project to contain our model.
-  pid = connection.find_or_create_project(arguments.project_name, arguments.project_description)
+  if arguments.project_name:
+    try:
+      pid = connection.find_or_create_project(arguments.project_name, arguments.project_description)
+    except Exception as e:
+      log('Could not find/create project: use a different name, or try a project id.', 
+        debug = arguments.debug, exception_type=Exception)
+  else:
+    pid = arguments.project_id
 
   # create the new, empty model.
   mid = connection.post_project_models(pid, "parameter-image", 
@@ -118,13 +140,13 @@ def create_model (arguments, log):
 
   # check that input file exists
   if not os.path.isfile(arguments.file):
-    log("Input file " + arguments.file + " does not exist.")
-    raise ValueError("Input file " + arguments.file + " does not exist.")
+    log("Input file " + arguments.file + " does not exist.", debug=arguments.debug,
+      exception_type=ValueError)
 
   # check that input/output columns are non-intersecting
   if set(arguments.input_columns).intersection(set(arguments.output_columns)):
-    log("Input columns and output columns are intersecting.")
-    raise ValueError("Input columns and output columns are intersecting.")
+    log("Input columns and output columns are intersecting.", debug=arguments.debug,
+      exception_type=ValueError)
 
   # parse file using standard slycat csv parser
   attributes, dimensions, data, csv_read_error = \
@@ -135,8 +157,8 @@ def create_model (arguments, log):
     if csv_read_error[i]["type"] == "warning":
       log("Warning: " + csv_read_error[i]["message"])
     else:
-      log("Error: " + csv_read_error[i]["message"])
-      raise ValueError(csv_read_error[i]["message"])
+      log("Error: " + csv_read_error[i]["message"], debug=arguments.debug, 
+        exception_type=ValueError)
 
   # get column names/types
   column_names = [attribute["name"] for attribute in attributes]
@@ -146,34 +168,34 @@ def create_model (arguments, log):
   if arguments.input_columns is not None:
     for input_col in arguments.input_columns:
       if input_col not in column_names:
-        log('Input column "' + input_col + '" not found in input file.')
-        raise ValueError('Input column "' + input_col + '" not found in input file.')
+        log('Input column "' + input_col + '" not found in input file.', debug=arguments.debug,
+          exception_type=ValueError)
 
   # check that outputs are in headers
   if arguments.output_columns is not None:
     for output_col in arguments.output_columns:
       if output_col not in column_names:
-        log('Output column "' + output_col + '" not found in input file.')
-        raise ValueError('Output column "' + output_col + '" not found in input file.')
+        log('Output column "' + output_col + '" not found in input file.', debug=arguments.debug,
+          exception_type=ValueError)
   
   # check that categorical columns are in headers
   if arguments.categorical_columns is not None:
     for cat_col in arguments.categorical_columns:
       if cat_col not in column_names:
-        log('Categorical column "' + cat_col + '" not found in input file.')
-        raise ValueError('Categorical column "' + cat_col + '" not found in input file.')
+        log('Categorical column "' + cat_col + '" not found in input file.', debug=arguments.debug,
+          exception_type=ValueError)
  
   # check that media-columns are in headers
   if arguments.media_columns is not None:
     for media_col in arguments.media_columns:
       if media_col not in column_names:
-        log('Media column "' + media_col + '" not found in input file.')
-        raise ValueError('Media column "' + media_col + '" not found in input file.')
+        log('Media column "' + media_col + '" not found in input file.', debug=arguments.debug,
+          exception_type=ValueError)
 
   # check that there is at least one numeric columns (to display scatter plot)
   if not 'float64' in column_types:
-    log("You must supply at least one numeric column in the input data.")
-    raise ValueError("You must supply at least one numeric column in the input data.")
+    log("You must supply at least one numeric column in the input data.", debug=arguments.debug,
+      exception_type=ValueError)
 
   # identify media columns automatically if not provided
   if arguments.media_columns is None:
