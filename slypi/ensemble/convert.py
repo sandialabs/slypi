@@ -210,7 +210,7 @@ def convert_simulation (plugin, args, ensemble_table, ensemble_dir, mirror_dir):
 
     # no files, then return empty
     if files_to_convert == []:
-        return [], []
+        return [], [], []
 
     # convert files
     files_created = plugin.convert_files(files_to_convert, mirror_dir, 
