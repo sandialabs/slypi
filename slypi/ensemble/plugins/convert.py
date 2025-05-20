@@ -17,6 +17,7 @@ from matplotlib import cm
 
 # 3rd party imports
 import numpy as np
+import pandas as pd
 
 # materials knowledge system
 # for exporting images
@@ -46,9 +47,10 @@ class Plugin(slypi.ensemble.PluginTemplate):
     # add any extra command line arguments
     def add_args(self):
 
-        self.parser.add_argument("--suffix", help="Suffix to describe output file(s), "
-                                                  'e.g. "--suffix phase_field".  The suffix name is included in the name '
-                                                  "of any output file.")
+        self.parser.add_argument("--suffix", default="", 
+                                 help="Suffix to describe output file(s), "
+                                      'e.g. "--suffix phase_field".  The suffix name is included in the name '
+                                      "of any output file.")
 
         self.parser.add_argument("--binary", action="store_true", help="Converts field "
                                                                        "variable to binary by clipping anything less than 0 to 0 and anyting "
@@ -92,10 +94,6 @@ class Plugin(slypi.ensemble.PluginTemplate):
         if args.video_fps <= 0:
             self.log.error("Video frames per second --video-fps must be > 0.")
             raise ValueError("video fps must be > 0.")
-
-        if args.suffix is None:
-            self.log.error('Please specify --suffix.')
-            raise ValueError("please specify --suffix for output file.")
 
     # initialize any local variables from command line arguments
     def init(self, args):
@@ -245,6 +243,20 @@ class Plugin(slypi.ensemble.PluginTemplate):
     # over-riding convert_files to generate sim.npy and mp4 files
     def convert_files(self, file_list, output_dir, output_type, input_type=None):
 
+        # check for dakota tabular.dat file
+        if len(file_list) == 1:
+            if file_list[0].endswith(".dat") or input_type == "dat":
+                if output_type == "csv":
+
+                    # read tabular.dat file
+                    df = pd.read_csv(file_list[0], sep='\s+')
+
+                    # save as tabular.csv file
+                    output_file = os.path.join(output_dir, 'tabular.csv')
+                    df.to_csv(output_file, index=False)
+
+                    return [output_file]
+
         # check for sim.npy or mp4
         if output_type == "sim.npy" or output_type == "mp4":
 
@@ -299,6 +311,9 @@ class Plugin(slypi.ensemble.PluginTemplate):
 
                 # get common file prefix
                 common_prefix = os.path.basename(os.path.commonprefix(file_list))
+
+                # remove trailing zeros, if they exist
+                common_prefix = common_prefix.rstrip('0')
 
                 # join to output directory and add field variable
                 file_out = os.path.join(output_dir, common_prefix +
