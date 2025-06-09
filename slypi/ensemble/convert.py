@@ -243,7 +243,7 @@ def progress_report(log, files_to_convert, ensemble_dir, files_created):
 
 # converts ensemble files from one format to another
 # call programmatically using arg_list
-def main(arg_list=None):
+def convert(arg_list=None):
 
     # initialize parser
     parser = init_parser()
@@ -322,4 +322,4 @@ def main(arg_list=None):
 
 # entry point for command line call
 if __name__ == "__main__":
-    main()
+    convert()

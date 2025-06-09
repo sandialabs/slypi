@@ -32,7 +32,6 @@ import pickle
 import numpy as np
 
 # local imports
-import slypi
 import slypi.ensemble as ensemble
 import slypi.ensemble.algorithms.reduction as algorithms
 from slypi.ensemble.utilities import Table as EnsembleTable
@@ -393,7 +392,7 @@ def convert_time_sim(time_aligned_data, num_time_steps, num_sim, num_dim):
     return reduced_data
 
 # performs dimension reduction on ensemble
-def main(arg_list=None):
+def reduce(arg_list=None):
 
     # initialize parser
     parser = init_parser()
@@ -748,4 +747,4 @@ def main(arg_list=None):
 
 # entry point for command line call
 if __name__ == "__main__":
-    main()
+    reduce()
