@@ -156,6 +156,9 @@ class Plugin(slypi.ensemble.PluginTemplate):
             if file_in.endswith('.npz'):
                 file_type = 'npz'
 
+            if file_in.endswith('.png'):
+                file_type = 'png'
+
         # check if we have npy or sim.npy
         if file_type == 'npy':
             
@@ -167,7 +170,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 raise ValueError("Could not read " + file_in + " as a .npy file.")
 
         # is it .npz?
-        elif file_in.endswith('.npz'):
+        elif file_type == 'npz':
 
             # read npz file
             try:
@@ -175,8 +178,18 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 data = data['arr_0']
             except ValueError:
                 self.log.error("Could not read " + file_in + " as a .npy file.")
-                raise ValueError("could not read " + file_in + " as a .npy file.")
+                raise ValueError("Could not read " + file_in + " as a .npy file.")
 
+        # is it an image file?
+        elif file_type == 'png':
+
+            try:
+                img = Image.open(file_in)
+                data = np.array(img)
+            except ValueError:
+                self.log.error("Could not read " + file_in + "as a .png file.")
+                raise ValueError("Could not read " + file_in + " as a .png file.")
+            
         # otherwise default to mesh
         else:
             data = super().read_file(file_in, file_type)
@@ -226,14 +239,20 @@ class Plugin(slypi.ensemble.PluginTemplate):
             # for jpg we need to scale data and use a colormap
             elif file_type == "jpg":
 
-                # convert to [0,1]
-                data, _, _ = self._scale_matrix(data)
+                # is it already RGB?
+                if len(data.shape) == 3:
+                    img = Image.fromarray(data.astype(np.uint8), 'RGB')
+                    img.save(file_out, quality=self.args.output_quality)
                 
-                # convert to standard jet color map image
-                img = Image.fromarray(np.uint8(cm.jet(data) * 255))
+                else:
+                    # convert to [0,1]
+                    data, _, _ = self._scale_matrix(data)
+                    
+                    # convert to standard jet color map image
+                    img = Image.fromarray(np.uint8(cm.jet(data) * 255))
 
-                # save image
-                img.convert("RGB").save(file_out, quality=self.args.output_quality)
+                    # save image
+                    img.convert("RGB").save(file_out, quality=self.args.output_quality)
 
         else:
 
@@ -251,8 +270,16 @@ class Plugin(slypi.ensemble.PluginTemplate):
                     # read tabular.dat file
                     df = pd.read_csv(file_list[0], sep='\s+')
 
+                    # pre-pend workdir.x as identification column
+                    eval_id = df['%eval_id']
+                    file_path = os.path.split(file_list[0])[0]
+                    workdirs = [os.path.join(file_path, 'workdir.' + str(id))
+                                for id in eval_id]
+                    df.insert(0, column='', value=workdirs)
+                    
                     # save as tabular.csv file
-                    output_file = os.path.join(output_dir, 'tabular.csv')
+                    root = os.path.split(file_list[0])[1][:-4]
+                    output_file = os.path.join(output_dir, root + '.csv')
                     df.to_csv(output_file, index=False)
 
                     return [output_file]
@@ -361,7 +388,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
             return [file_out]
 
         else:
-
+        
             # revert to 1-1 file conversion
             return super().convert_files(file_list, output_dir, output_type, input_type=input_type)
 

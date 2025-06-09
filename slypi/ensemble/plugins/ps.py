@@ -17,6 +17,7 @@ import os
 
 # 3rd party imports
 import numpy as np
+import pandas as pd
 
 # auto-correlation
 import pymks
@@ -219,7 +220,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
 
             # default to meshio output
             super().write_file(data, file_out, file_type=file_type)
-            
+    
     # over-riding expand to generate videoswarm input files
     def expand(self, table, header, file_list, **kwargs):
         """

@@ -94,7 +94,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
         # plugin identification
         self.add_argument("--plugin", default=DEFAULT_PLUGIN,
-            help = "Plugin Python file name to import (defaults to memphis), "
+            help = "Plugin Python file name to import (defaults to '%(default)s'), "
                    "can be either a plugin from slypi/ensemble/plugins (no extension) "
                    'or a python file (.py extension). Use "python -m '
                    'slypi.ensemble.plugins.plugin --help" to see any command line '
@@ -486,7 +486,7 @@ class PluginTemplate:
             file_data (object): meta data for the simulation
         """
 
-        pass
+        return None
 
     # pre-processing specific to simulation
     def preprocess (self, data):

@@ -292,7 +292,7 @@ class Table:
             mirror_dirs (list): list of mirror directories (including output_dir),
                 None if directories were not created
         """
-
+        
         # get common path
         if len(ensemble_dirs) > 1:
             common_path = os.path.commonpath(ensemble_dirs)
@@ -309,8 +309,8 @@ class Table:
             ensemble_path = os.path.dirname(ensemble_dirs[i])
 
             # remove common path
-            mirror_path = ensemble_path.split(common_path)[1]
-            mirror_path = os.path.basename(mirror_path)
+            mirror_path = ensemble_path.split(common_path)[1].strip(os.sep)
+            # mirror_path = os.path.basename(mirror_path)
 
             # strip off base dir
             mirror_dirs.append(os.path.join(output_dir, mirror_path))

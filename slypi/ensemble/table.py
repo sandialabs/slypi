@@ -38,6 +38,8 @@ def init_parser():
                         "(all column headers must be identical).")
     parser.add_argument('--expand', help='Expand links in .csv file to include data in table.  Uses '
                         'plugin to expand links.')
+    parser.add_argument('--convert', nargs=1, help="Convert a slypi.ensemble .csv table to " +
+                        "a final Slycat table (remove source index).")
 
     # create/join csv from ensemble specifier and input files
     parser.add_argument("--ensemble", help="Directory or directories to include in ensemble, "
@@ -156,22 +158,27 @@ def check_expand_arguments(log, args):
         log.error("Please specify --expand-header and try again.")
         sys.exit(1)
 
+# check arguments for convert
+def check_convert_arguments(log, args):
+
+    pass
+
 # check command arguments
 def check_arguments(log, args):
     
     # convert user selection into True/False is option is selected
     options_selected = [vars(args)["create"]] + [vars(args)[option] is not None 
-                        for option in ["join", "concat", "expand"]]
+                        for option in ["join", "concat", "expand", "convert"]]
 
     # check that one option is selected
     if sum(options_selected) == 0:
-        log.error("Please select one of --create, --join, --concat, and --expand " +
+        log.error("Please select one of --create, --join, --concat, --expand, or --convert " +
                   "and try again.")
         sys.exit(1)
 
     # make sure only one option is selected
     if sum(options_selected) > 1:
-        log.error("Select only one of --create, --join, --concat, or --expand and try again.")
+        log.error("Select only one of --create, --join, --concat, --expand, or --convert and try again.")
         sys.exit(1)
 
     # make sure the output directory is present
@@ -199,6 +206,10 @@ def check_arguments(log, args):
     # check expand option
     if args.expand is not None:
         check_expand_arguments(log, args)
+
+    # check convert option
+    if args.convert is not None:
+        check_convert_arguments(log, args)
 
 # create .csv file
 def create_csv(args, log, plugin):
@@ -233,16 +244,16 @@ def create_csv(args, log, plugin):
 
         # read input files
         input_data.append(plugin.read_input_deck(files_to_read, file_type=args.input_format))
-
+    
     # combine all input data headers
     input_headers = []
     for i in range(num_ensemble_dirs):
-        for key in input_data[i].keys():
-            if key not in input_headers:
-                input_headers.append(key)
+        if input_data[i]:
+            for key in input_data[i].keys():
+                if key not in input_headers:
+                    input_headers.append(key)
     
     # create table using input data headers
-    input_table = []
     for header in input_headers:
 
         # create column for a given header
@@ -411,6 +422,15 @@ def expand_csv(args, log, plugin):
             output_dir=args.output_dir, csv_out=args.csv_out, csv_no_index=args.csv_no_index, 
             csv_index_header=args.csv_index_header, csv_headers=args.csv_headers)
 
+# convert slypi.ensemble intermediate csv to normal csv
+def convert_csv(args, log, plugin):
+
+    # create ensemble table for each .csv file
+    table_to_convert = EnsembleTable(log, csv_file=args.convert[0])
+
+    # save to csv without index column
+    table_to_convert.to_csv(args.csv_out, args.output_dir, index=False)
+
 # creates a .csv file for remaining ensemble tools to use as input
 # call from Python using arg_list
 def main(arg_list=None):
@@ -474,6 +494,10 @@ def main(arg_list=None):
     # expand csv
     elif args.expand is not None:
         expand_csv(args, log, plugin)
+
+    # convert to final version csv
+    elif args.convert is not None:
+        convert_csv(args, log, plugin)
 
 # entry point for command line call
 if __name__ == "__main__":
