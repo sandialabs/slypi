@@ -239,7 +239,7 @@ def progress_report(log, files_to_convert, ensemble_dir, files_created):
     log.info("Found %d file(s) in ensemble directory %s." % 
         (len(files_to_convert), ensemble_dir))
     for j in range(len(files_created)):
-        log.info('File written "%s".' % files_created[j])
+        log.info('Saved file %s.' % files_created[j])
 
 # converts ensemble files from one format to another
 # call programmatically using arg_list

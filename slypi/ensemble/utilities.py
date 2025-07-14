@@ -12,6 +12,7 @@
 import re
 import os
 import posixpath
+from pathlib import Path
 
 # 3rd party libraries
 import numpy as np
@@ -106,7 +107,8 @@ class Table:
             table_col = []
             for ensemble_dir in ensemble_dirs:
                 if file_spec is not None:
-                    table_col.append(os.path.join(ensemble_dir, file_spec))
+                    table_col.append(
+                        Path(os.path.join(ensemble_dir, file_spec)).as_posix())
                 else:
                     table_col.append(ensemble_dir)
             
@@ -236,7 +238,10 @@ class Table:
                 if os.path.exists(os.path.join(path, file_or_dir)):
                     sorted_catalog_names.append(os.path.join(path, file_or_dir))
 
-        return sorted_catalog_names
+        # store in posix format
+        posix_catalog_names = [Path(name).as_posix() for name in sorted_catalog_names]
+
+        return posix_catalog_names
 
     # returns a list of directories matching %d[::] specifier
     def directories(self, directory_spec):
@@ -292,7 +297,7 @@ class Table:
             mirror_dirs (list): list of mirror directories (including output_dir),
                 None if directories were not created
         """
-        
+                
         # get common path
         if len(ensemble_dirs) > 1:
             common_path = os.path.commonpath(ensemble_dirs)
@@ -300,6 +305,9 @@ class Table:
         # if only one simulation, commom path is everything up to file specifier
         else:
             common_path = os.path.dirname(ensemble_dirs[0])
+
+        # convert to poxis
+        common_path = Path(common_path).as_posix()
 
         # construct mirror directories
         mirror_dirs = []
@@ -309,7 +317,8 @@ class Table:
             ensemble_path = os.path.dirname(ensemble_dirs[i])
 
             # remove common path
-            mirror_path = ensemble_path.split(common_path)[1].strip(os.sep)
+            mirror_path = ensemble_path.split(common_path)[1].strip('/')
+
             # mirror_path = os.path.basename(mirror_path)
 
             # strip off base dir
@@ -437,7 +446,7 @@ class Table:
 
             # add files to list
             sim_files.append(files_to_convert)
-
+        
         return sim_files
 
     # convert an input file specifier to an output file specifier
@@ -504,13 +513,13 @@ class Table:
 
         # check that columns exist in table
         self._check_cols(cols)
-
+        
         # go through each column and convert file paths
         for col in cols:
             
             # get column
             old_col = self.table[col].to_list()
-
+            
             # convert column
             new_col = self._convert_col_uri(old_col, uri_root)
 
@@ -521,15 +530,16 @@ class Table:
     def _convert_col_uri (self, paths, uri_root):
 
         # get common path
-        common_path = os.path.commonpath(paths)
+        common_path = Path(os.path.commonpath(paths)).as_posix()
 
         # go through list
         new_paths = []
         for path in paths:
-
+            
             # remove common path
+            path = Path(path).as_posix()
             new_path = path.split(common_path)[1]
-
+        
             # reverse path to get rid of any leading "/" which
             # might be interpreted as a root directory
             dir_path = os.path.basename(new_path[::-1])[::-1]
@@ -595,11 +605,11 @@ class Table:
                              file_out)
 
         # put output file into output_dir
-        csv_out_file = os.path.join(output_dir, file_out)
+        csv_out_file = Path(os.path.join(output_dir, file_out)).as_posix()
 
         self.table.to_csv(path_or_buf=csv_out_file, columns=cols, 
             index=index, index_label=index_label)
-        self.log.info('File written: %s.' % csv_out_file)
+        self.log.info('Saved file %s.' % csv_out_file)
 
 
 # helper function for parsing %d[::] format string

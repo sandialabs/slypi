@@ -117,11 +117,20 @@ class Plugin(ensemble.PluginTemplate):
             # read .jpg file and reshape into vector
             data = imageio.imread(file_in)
 
+        elif file_in.endswith('.png'):
+
+            try:
+                img = Image.open(file_in)
+                data = np.array(img)
+            except ValueError:
+                self.log.error("Could not read " + file_in + "as a .png file.")
+                raise ValueError("Could not read " + file_in + " as a .png file.")
+
         else:
-            self.log.error("The videoswarm plugin accepts only .jpg or .rd.npy files.")
-            raise TypeError("videoswarm plugin accepts only .jpg or .rd.npy files.")
+            self.log.error("The videoswarm plugin accepts only .png, .jpg or .rd.npy files.")
+            raise TypeError("videoswarm plugin accepts only .png, .jpg or .rd.npy files.")
         
-        self.log.info("Read file: " + file_in)
+        self.log.info("Read file " + file_in + ".")
 
         return data
 
@@ -142,8 +151,8 @@ class Plugin(ensemble.PluginTemplate):
             # default to meshio output
             super().write_file(data, file_out, file_type=file_type)
 
-    # convert from jpg to numpy 
-    def _convert_jpg (self, data):
+    # convert from 3 channel image to numpy 
+    def _convert_img (self, data):
 
         if len(data.shape) == 3:
 
@@ -174,8 +183,8 @@ class Plugin(ensemble.PluginTemplate):
     # perform pre-processing on jpg data (n,n,3)
     def preprocess (self, data, flatten=True):
         
-        # if jpg, convert to matrix using jet map
-        data = self._convert_jpg(data)
+        # if image, convert to matrix using jet map
+        data = self._convert_img(data)
 
         # scale data, if requested
         if self.args.scale:
@@ -350,7 +359,7 @@ class Plugin(ensemble.PluginTemplate):
             csv_xcoords_file = csv.writer(xcoords_file)
             for i in xcoords.tolist():
                 csv_xcoords_file.writerow(['{:f}'.format(x) for x in i])
-        self.log.info("File written: " + xcoords_file_name)
+        self.log.info("Saved file " + xcoords_file_name + ".")
 
         # write out movies.xcoords file (use only float precision)
         ycoords_file_name = os.path.join(output_dir, csv_root + '.ycoords')
@@ -358,7 +367,7 @@ class Plugin(ensemble.PluginTemplate):
             csv_ycoords_file = csv.writer(ycoords_file)
             for i in ycoords.tolist():
                 csv_ycoords_file.writerow(['{:f}'.format(y) for y in i])
-        self.log.info("File written: " + ycoords_file_name)
+        self.log.info("Saved file " + ycoords_file_name + ".")
 
         # add time to first row of xcoords to make trajectories
         num_frames, num_movies = xcoords.shape
@@ -375,7 +384,7 @@ class Plugin(ensemble.PluginTemplate):
             for i in traj.tolist():
                 csv_traj_file.writerow(['{:f}'.format(t) for t in i])
 
-        self.log.info("File written: " + traj_file_name)
+        self.log.info("Saved file " + traj_file_name + ".")
 
 # if called from the command line display plugin specific command line arguments
 if __name__ == "__main__":

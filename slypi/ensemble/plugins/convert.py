@@ -7,7 +7,7 @@
 
 # standard library imports
 import os
-
+from pathlib import Path
 # for writing mp4
 import imageio
 
@@ -279,7 +279,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
                     
                     # save as tabular.csv file
                     root = os.path.split(file_list[0])[1][:-4]
-                    output_file = os.path.join(output_dir, root + '.csv')
+                    output_file = Path(os.path.join(output_dir, root + '.csv')).as_posix()
                     df.to_csv(output_file, index=False)
 
                     return [output_file]
@@ -343,8 +343,8 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 common_prefix = common_prefix.rstrip('0')
 
                 # join to output directory and add field variable
-                file_out = os.path.join(output_dir, common_prefix +
-                                        self.args.suffix + "." + output_type)
+                file_out = Path(os.path.join(output_dir, common_prefix +
+                                self.args.suffix + "." + output_type)).as_posix()
 
             # if one file, change extension to output type
             else:
@@ -359,7 +359,8 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 else:
                     file_root, file_ext = os.path.splitext(file_name)
 
-                file_out = os.path.join(output_dir, file_root + "." + output_type)
+                file_out = Path(os.path.join(output_dir, file_root + "." + 
+                                             output_type)).as_posix()
 
             # write out as sim.npy
             if output_type == "sim.npy":

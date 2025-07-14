@@ -42,7 +42,6 @@ from shutil import copyfile
 # copy slycat.darray and slycat csv parser code into slypi directory. This
 # makes slypi a Python package without other Slycat dependencies.
 copyfile('../slycat/packages/slycat/darray.py', 'slypi/darray.py')
-copyfile('../slycat/packages/slycat/pandas_util.py', 'slypi/pandas_util.py')
 copyfile('../slycat/web-server/plugins/slycat-video-swarm/vs-parse-files.py', 'slypi/vs/vs_parse_files.py')
 
 import slypi

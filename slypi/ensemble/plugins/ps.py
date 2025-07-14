@@ -18,6 +18,7 @@ import os
 # 3rd party imports
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 # auto-correlation
 import pymks
@@ -87,6 +88,17 @@ class Plugin(slypi.ensemble.PluginTemplate):
         # save args for later use
         self.args = args
 
+    # convert from 3 channel image to numpy 
+    def _convert_img (self, data):
+
+        if len(data.shape) == 3:
+
+            # convert to black and white image then numpy array
+            img = Image.fromarray(data).convert('L')
+            data = np.array(img)
+
+        return data
+    
     # scale values between [0,1]
     def _scale(self, data):
 
@@ -107,6 +119,9 @@ class Plugin(slypi.ensemble.PluginTemplate):
 
     # perform pre-processing on jpg data (n,n,3)
     def preprocess (self, data, flatten=True):
+
+        # if image, convert to matrix using jet map
+        data = self._convert_img(data)
 
         # scale data, if requested
         if self.args.scale:
@@ -191,11 +206,21 @@ class Plugin(slypi.ensemble.PluginTemplate):
             except ValueError:
                 self.log.error("Could not read " + file_in + " as a .npy file.")
                 raise ValueError("could not read " + file_in + " as a .npy file.")
+            
+        elif file_in.endswith('.png'):
+
+            try:
+                img = Image.open(file_in)
+                data = np.array(img)
+            except ValueError:
+                self.log.error("Could not read " + file_in + "as a .png file.")
+                raise ValueError("Could not read " + file_in + " as a .png file.")
+            
         else:
-            self.log.error("The parameter space plugin accepts only .rd.npy or .npz files.")
-            raise TypeError("parameter space plugin accepts only .rd.npy or .npz files.")
+            self.log.error("The parameter space plugin accepts only .png, .rd.npy or .npz files.")
+            raise TypeError("parameter space plugin accepts only .png, .rd.npy or .npz files.")
         
-        self.log.info("Read file: " + file_in)
+        self.log.info("Read file " + file_in + ".")
         
         return data
 

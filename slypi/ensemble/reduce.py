@@ -24,6 +24,7 @@ import sys
 
 # output
 import os
+from pathlib import Path
 
 # restart file
 import pickle
@@ -239,7 +240,7 @@ def get_sim_files (log, args, ensemble_dirs, mirror_dirs, ensemble_table):
             sys.exit(1)
 
         # output file name for each ensemble
-        output_files.append(os.path.join(mirror_dirs[i], args.output_file))
+        output_files.append(Path(os.path.join(mirror_dirs[i], args.output_file)).as_posix())
 
     # check that time counts are uniform
     if min(file_counts) < max(file_counts):
@@ -299,13 +300,10 @@ def get_batch (log, plugin, batch_files, file_type,
     # get batch of data
     data = plugin.read_file_batch(batch_files, file_type=file_type, 
         parallel=parallel, flatten=flatten)
-
+    
     # pre-process and count time points
     time_counts = []
     for i in range(len(batch_files)):
-            
-        # data has already been loaded
-        log.info("Read file %s." % batch_files[i])
 
         # make sure data is numpy array
         data[i] = np.asarray(data[i])
@@ -519,13 +517,13 @@ def reduce(arg_list=None):
     # do reduction differently for different cases
     if algorithm.time_align_dim() is None:
         if args.file_batch_size is None:
-
-            # 1st case is bulk reduction in memory
             
+            # 1st case is bulk reduction in memory
+
             # read all files into matrix
             data_to_reduce, num_time = get_batch(log, plugin,
                 batch_files[0], args.input_format, args.parallel, flatten)
-
+            
             # train dimension reduction model, if not loaded
             if args.input_model is None:
                 log.info("Training dimension reduction model.")
@@ -674,7 +672,7 @@ def reduce(arg_list=None):
             num_time_steps = num_time * num_files
             reduced_data = convert_time_sim(time_aligned_data, num_time_steps, 
                 num_sim, algorithm.num_dim())
-
+    
     # save data
     for i in range(num_sim):
 

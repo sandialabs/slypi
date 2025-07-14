@@ -96,7 +96,7 @@ def parse_file(file, file_name=False):
                 if header_j_suffix.isnumeric():
                     duplicated_headers.append(i+1)
                     duplicated_headers.append(j+1)
-    duplicated_headers = pd.unique(duplicated_headers)
+    duplicated_headers = pd.unique(pd.Series(duplicated_headers))
 
     # slycat warning for duplicated headers
     if len(duplicated_headers) != 0:

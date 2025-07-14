@@ -28,6 +28,7 @@ import re
 import importlib
 import pkgutil
 import os
+from pathlib import Path
 
 # 3rd party imports
 
@@ -381,7 +382,7 @@ class PluginTemplate:
 
     # helper function to read in a batch of files
     def _get_file_batch(self, batch_files, file_type=None, flatten=True):
-
+                
         # read all files into list
         data = []
         for i in range(len(batch_files)):
@@ -462,8 +463,9 @@ class PluginTemplate:
             # create output file name
             file_name = os.path.basename(file_to_convert)
             file_root, file_ext = os.path.splitext(file_name)
-            file_out = os.path.join(output_dir, file_root + "." + output_type)
-
+            file_out = Path(
+                os.path.join(output_dir, file_root + "." + output_type)).as_posix()
+            
             # convert file
             self.convert_file(file_to_convert, file_out, 
                 file_in_type=input_type, file_out_type=output_type)

@@ -274,8 +274,6 @@ def create_csv(args, log, plugin):
 
         # check if we should exclude this column
         if args.exclude_csv_headers is not None:
-            print("exclude")
-            print(args)
             if len(args.csv_headers) > 0:
                 if header in args.exclude_csv_headers:
                     continue
