@@ -8,6 +8,7 @@
 # standard library imports
 import os
 from pathlib import Path
+
 # for writing mp4
 import imageio
 

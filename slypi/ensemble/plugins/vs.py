@@ -12,9 +12,9 @@
 
 
 # standard library imports
-import argparse
 import csv
 import os
+from pathlib import Path
 
 # 3rd party imports
 import numpy as np
@@ -354,7 +354,7 @@ class Plugin(ensemble.PluginTemplate):
         csv_root = os.path.splitext(os.path.basename(csv_out))[0]
 
         # write out movies.xcoords file (use only float precision)
-        xcoords_file_name = os.path.join(output_dir, csv_root + '.xcoords')
+        xcoords_file_name = Path(os.path.join(output_dir, csv_root + '.xcoords')).as_posix()
         with open(xcoords_file_name, 'w', newline='', encoding='utf-8') as xcoords_file:
             csv_xcoords_file = csv.writer(xcoords_file)
             for i in xcoords.tolist():
@@ -362,7 +362,7 @@ class Plugin(ensemble.PluginTemplate):
         self.log.info("Saved file " + xcoords_file_name + ".")
 
         # write out movies.xcoords file (use only float precision)
-        ycoords_file_name = os.path.join(output_dir, csv_root + '.ycoords')
+        ycoords_file_name = Path(os.path.join(output_dir, csv_root + '.ycoords')).as_posix()
         with open(ycoords_file_name, 'w', newline='', encoding='utf-8') as ycoords_file:
             csv_ycoords_file = csv.writer(ycoords_file)
             for i in ycoords.tolist():
@@ -378,7 +378,7 @@ class Plugin(ensemble.PluginTemplate):
         traj[1:, :] = xcoords.transpose()
 
         # write out movies.trajectories
-        traj_file_name = os.path.join(output_dir, csv_root + '.trajectories')
+        traj_file_name = Path(os.path.join(output_dir, csv_root + '.trajectories')).as_posix()
         with open(traj_file_name, 'w', newline='', encoding='utf-8') as traj_file:
             csv_traj_file = csv.writer(traj_file)
             for i in traj.tolist():

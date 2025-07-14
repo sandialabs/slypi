@@ -77,7 +77,7 @@ def upload_model (arguments, csv_data, xcoords_data, ycoords_data, traj_data, li
     connection.put_model_arrayset(mid, "movies.meta")
     connection.put_model_arrayset_array(mid, "movies.meta", 0, 
         csv_data['dimensions'], csv_data['attributes'])
-    for index in range(len(csv_data['data'][1])):
+    for index in range(len(csv_data['data'])):
         values = [np.asarray(csv_data['data'][index])]
         connection.put_model_arrayset_data(mid, "movies.meta", "0/%s/..." % index, values)
 
