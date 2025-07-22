@@ -4,7 +4,8 @@
 
 # This module supports interacting with the Slycat server from Python and the command line.
 
-__version__ = "1.0.6"
+import importlib.metadata
+__version__ = importlib.metadata.version("slypi")
 
 # standard libraries
 

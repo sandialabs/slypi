@@ -19,7 +19,7 @@ the help for the ``list_markings.py`` script.
 
 .. code-block:: bash
 
-  $ python -m slypi.util.list_markings --help
+  python -m slypi.util.list_markings --help
 
 .. program-output:: python -m slypi.util.list_markings --help
 
@@ -31,7 +31,7 @@ to use the ``list_markings.py`` script.
 
 .. code-block:: bash
 
-  $ python -m slypi.util.list_markings --host https://your-host --kerberos
+  python -m slypi.util.list_markings --host https://your-host --kerberos
 
 You will of course need to use the appropriate authentication for your server.
 
@@ -61,9 +61,7 @@ To upload a parameter space model using the cars data to a Slycat server, use
 
 .. code-block:: bash
 
-  $ python -m slypi.ps.upload_csv example-data/cars.csv 
-      --marking uur 
-      --project-name "PS Models"
+  python -m slypi.ps.upload_csv example-data/cars.csv --marking uur --project-name "PS Models"
 
 .. image:: images/ps-cars.png
   :width: 800
@@ -91,10 +89,7 @@ To upload a CCA model to Slycat using the cars data, use:
 
 .. code-block:: bash
 
-  $ python -m slypi.cca.upload_csv example-data/cars.csv 
-      --input-columns Cylinders Displacement Weight Year Origin 
-      --output-columns MPG Horsepower Acceleration 
-      --project-name "CCA Models"
+  python -m slypi.cca.upload_csv example-data/cars.csv --input-columns Cylinders Displacement Weight Year Origin --output-columns MPG Horsepower Acceleration --project-name "CCA Models"
 
 .. image:: images/cca-cars.png
   :width: 800
@@ -117,8 +112,7 @@ To upload a DAC model into Slycat, use:
 
 .. code-block:: bash
 
-  $  python -m slypi.dac.upload_gen example-data/weather-dac-gen-pca.zip  
-      --project-name "DAC Models"
+  python -m slypi.dac.upload_gen example-data/weather-dac-gen-pca.zip  --project-name "DAC Models"
 
 .. image:: images/dac-weather.png
   :width: 800
@@ -159,15 +153,7 @@ videos.  This can be done using:
 
 .. code-block:: bash
 
-  $ python -m slypi.ensemble.convert 
-      --ensemble example-data/spinodal/workdir.%d 
-      --input-files out.cahn_hilliard_%d.npz 
-      --output-dir example-data/spinodal-out
-      --csv-out movies.csv 
-      --csv-header Movie 
-      --output-format mp4 
-      --plugin convert
-      --suffix phase_field 
+  python -m slypi.ensemble.convert --ensemble example-data/spinodal/workdir.%d --input-files out.cahn_hilliard_%d.npz --output-dir example-data/spinodal-out --csv-out movies.csv --csv-header Movie --output-format mp4 --plugin convert --suffix phase_field 
 
 The output of this command will consist of the generated movies in a new directory 
 ``example-data/spinodal-out`` mirroring the file structure of the input data,
@@ -178,44 +164,16 @@ time-aligned dimension reduction algorithm.  This is done using:
 
 .. code-block:: bash
 
-  $ python -m slypi.ensemble.reduce 
-      --ensemble example-data/spinodal/workdir.%d 
-      --input-files out.cahn_hilliard_%d.npz 
-      --output-dir example-data/spinodal-out 
-      --algorithm PCA 
-      --time-align 10 
-      --num-dim 2 
-      --csv-out time-aligned-pca.csv 
-      --csv-header "Time Aligned PCA" 
-      --output-file out.cahn_hilliard_time_aligned_PCA.rd.npy 
-      --plugin vs 
-      --auto-correlate 
-      --binary
-      --over-write
+  python -m slypi.ensemble.reduce --ensemble example-data/spinodal/workdir.%d --input-files out.cahn_hilliard_%d.npz --output-dir example-data/spinodal-out --algorithm PCA --time-align 10 --num-dim 2 --csv-out time-aligned-pca.csv --csv-header "Time Aligned PCA" --output-file out.cahn_hilliard_time_aligned_PCA.rd.npy --plugin vs --auto-correlate --binary --over-write
 
 Details on the time-aligned algorithm can be found in the paper [Martin2019].  
 Finally, we can create the VideoSwarm model files using:
 
 .. code-block:: bash
 
-  $ python -m slypi.ensemble.table --join 
-      example-data/spinodal/metadata.csv 
-      example-data/spinodal-out/movies.csv
-      example-data/spinodal-out/time-aligned-pca.csv 
-      --output-dir example-data/spinodal-out 
-      --ignore-index 
-      --csv-out metadata-time-aligned-pca.csv 
-      --csv-no-index 
-      --over-write
+  python -m slypi.ensemble.table --join example-data/spinodal/metadata.csv example-data/spinodal-out/movies.csv example-data/spinodal-out/time-aligned-pca.csv --output-dir example-data/spinodal-out --ignore-index --csv-out metadata-time-aligned-pca.csv --csv-no-index --over-write
 
-  $ python -m slypi.ensemble.table --expand 
-      example-data/spinodal-out/metadata-time-aligned-pca.csv
-      --expand-header "Time Aligned PCA" 
-      --output-dir example-data/spinodal-out/vs-local 
-      --csv-out movies.csv 
-      --plugin vs 
-      --remove-expand-col 
-      --video-fps 25
+  python -m slypi.ensemble.table --expand example-data/spinodal-out/metadata-time-aligned-pca.csv--expand-header "Time Aligned PCA" --output-dir example-data/spinodal-out/vs-local --csv-out movies.csv --plugin vs --remove-expand-col --video-fps 25
 
 These commands produces VideoSwarm formatted local files in the directory ``vs-files``.  There are four
 files produced, ``movies.csv``, ``movies.xcoords``, ``movies.ycoords``, and ``movies.trajectories``.
@@ -223,13 +181,7 @@ These files can be uploaded using the VideoSwarm wizard, or using the upload scr
 
 .. code-block:: bash
 
-  $ python -m slypi.vs.upload_local 
-      --csv-file example-data/spinodal-out/vs-local/movies.csv 
-      --xcoords-file example-data/spinodal-out/vs-local/movies.xcoords 
-      --ycoords-file example-data/spinodal-out/vs-local/movies.ycoords
-      --traj-file example-data/spinodal-out/vs-local/movies.trajectories 
-      --video-column Movie 
-      --project-name "VS Models"
+  python -m slypi.vs.upload_local --csv-file example-data/spinodal-out/vs-local/movies.csv --xcoords-file example-data/spinodal-out/vs-local/movies.xcoords --ycoords-file example-data/spinodal-out/vs-local/movies.ycoords--traj-file example-data/spinodal-out/vs-local/movies.trajectories --video-column Movie --project-name "VS Models"
 
 You will need to specify your own login and Slycat server details.  The end result of this example
 is shown below.

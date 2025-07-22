@@ -24,7 +24,10 @@ import imageio
 from PIL import Image
 
 # auto-correlation
-import pymks
+try:
+    import pymks
+except ImportError:
+    pymks = None
 
 # local imports
 import slypi.ensemble as ensemble
@@ -76,6 +79,15 @@ class Plugin(ensemble.PluginTemplate):
 
         # check that binary is active if auto-correlate is selected
         if args.auto_correlate:
+
+            # check if pymks is available
+            if not pymks:
+                self.log.error("The pymks module has not been installed, " + 
+                               "cannot perform auto-correlation.")
+                raise ValueError("The pymks module has not been installed, " + 
+                                 "cannot perform auto-correlation.")
+            
+            # check that binary flag is also present
             if not args.binary:
                 self.log.error("Auto-correlation requires binary input, please use --binary " +
                                "and try again.")

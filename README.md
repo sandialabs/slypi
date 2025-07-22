@@ -9,7 +9,7 @@ Slycat is a web application for interactive visualization of ensemble data (see 
 Full documentation can be found in the docs folder and can be compiled using Sphinx using
 
 ```sh
-$ make html
+make html
 ```
 
 The resulting documention can be accessed under build from the file index.html.  You can also
@@ -19,7 +19,7 @@ read the compiled version at https://slypi.readthedocs.io/en/latest/index.html.
 This code is available at https://pypi.org/project/slypi/ and can be installed using
 
 ```sh
-$ pip install slypi
+pip install slypi
 ```
 
 If you are working behind a proxy, you might also need, e.g.
@@ -51,6 +51,14 @@ pip install -e slypi .
 Note: that for SlyPI to work, you must have a Slycat server running.  
 See https://slycat.readthedocs.io/en/latest/ for details on setting up a server.
 
+## Optional Dependencies
+
+SlyPI uses PyMKS (https://github.com/materialsinnovation/pymks, https://pypi.org/project/pymks/) to compute auto-correlation.  This package doesn't install with versions of Python past 3.11.8, so it is included as an optional dependency.  If you want to use auto-correlation, use
+
+```sh
+pip install slypi[auto]
+```
+
 ## Basic Use
 
 SlyPI can be imported from within a Python file using
@@ -61,18 +69,18 @@ Some examples using SlyPI can be found in the SlyPI
 source directory.  These can be run using, e.g.
 
 ```sh
-$ python -m slypi.util.list_markings
+python -m slypi.util.list_markings
 ```
 
 In addition, there are two main entry points defined, one for the Slycat Dial-A-Cluster model
 
 ```sh
-$ dac_upload_gen
+dac_upload_gen
 ```
 and one for the parameter space model
 
 ```sh
-$ ps_upload_csv
+ps_upload_csv
 ```
 
 ## Kerberos
@@ -82,7 +90,7 @@ this will fail.  If you get an error related to Kerberos credentials (e.g. "Coul
 Kerberos ticket," or "User not Kerberos authenticated"), try:
 
 ```sh
-$ kinit
+kinit
 ```
 
 Then re-run the original command.
@@ -103,7 +111,7 @@ environment variables, they will be ignored.  The proxy flags are used as follow
 (for example):
 
 ```sh
-$ python -m slypi.list_markings.py --http-proxy http://your.http.proxy --https-proxy https://your.https.proxy
+python -m slypi.list_markings.py --http-proxy http://your.http.proxy --https-proxy https://your.https.proxy
 ```
 
 The verify flag can be used to pass a security certificate as a command line argument and
@@ -115,15 +123,15 @@ The simplest examples of interacting with the Slycat server issue
 requests for markings and projects, e.g.
 
 ```sh
-$ python -m slypi.util.list_markings.py
-$ python -m slypi.util.list_projects.py
+python -m slypi.util.list_markings.py
+python -m slypi.util.list_projects.py
 ```
 
 To examine a particular model or project, use
 
 ```sh
-$ python -m slypi.util.get_model.py mid
-$ python -m slypi.util.get_project.py pid
+python -m slypi.util.get_model.py mid
+python -m slypi.util.get_project.py pid
 ```
 
 where mid and pid are the hash identifiers for a Slycat model
@@ -137,13 +145,13 @@ The SlyPI module provides a command line option for creating Slycat
 models.  For example, to create a sample CCA model using random data, use:
 
 ```sh
-$ python -m slypi.cca.upload_random.py
+python -m slypi.cca.upload_random.py
 ```
 
 To create a sample CCA model from a CSV file, use:
 
 ```sh
-$ python -m slypi.cca.upload_csv.py slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration --project-name "CCA Models"
+python -m slypi.cca.upload_csv.py slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration --project-name "CCA Models"
 ```
 
 where "slycat-data/cars.csv" is from the slycat-data git repository at
@@ -179,7 +187,7 @@ A Parameter Space model can also  be created from .csv file using the
 ps_csv script.  From the command line, use:
 
 ```sh
-$ python -m slypi.ps.upload_csv slycat-data/cars.csv --input-columns Cylinders Displacement Weight Year --output-columns MPG Horsepower Acceleration --project-name "PS Models"
+python -m slypi.ps.upload_csv slycat-data/cars.csv --input-columns Cylinders Displacement Weight Year --output-columns MPG Horsepower Acceleration --project-name "PS Models"
 ```
 
 ## Dial-A-Cluster (DAC) Models
@@ -191,7 +199,7 @@ the Slycat user manual.
 To upload a DAC generic .zip file, use
 
 ```sh
-$ dac_upload_gen slycat-data/dial-a-clsuter/weather-dac-gen.zip --project-name "DAC Models"
+dac_upload_gen slycat-data/dial-a-clsuter/weather-dac-gen.zip --project-name "DAC Models"
 ```
 
 This will create a model from a single .zip file containing the appropriate

@@ -21,7 +21,10 @@ import pandas as pd
 from PIL import Image
 
 # auto-correlation
-import pymks
+try:
+    import pymks
+except ImportError:
+    pymks = None
 
 # local imports
 from slypi.ensemble import utilities
@@ -76,11 +79,21 @@ class Plugin(slypi.ensemble.PluginTemplate):
 
         # check that binary is active if auto-correlate is selected
         if args.auto_correlate:
+
+            # check if pymks is available
+            if not pymks:
+                self.log.error("The pymks module has not been installed, " + 
+                               "cannot perform auto-correlation.")
+                raise ValueError("The pymks module has not been installed, " + 
+                                 "cannot perform auto-correlation.")
+
+            # check that binary option is enabled
             if not args.binary:
                 self.log.error("Auto-correlation requires binary input, please use --binary " +
                                "and try again.")
                 raise ValueError("auto-correlation requires binary flag (see " +
                                  "slypi.ensemble.plugins.vs --help.")
+            
 
     # initialize any local variables from command line arguments
     def init(self, args):
