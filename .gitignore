@@ -4,3 +4,4 @@
 build/**
 dist/**
 src/slypi.egg-info/**
+tests/integration/test-lodestar.py
