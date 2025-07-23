@@ -21,7 +21,7 @@ authors = [
   {email = "smartin@sandia.gov"},
 ]
 readme = "README.md"
-version = "1.0.7"
+version = "1.0.8"
 license-files = [
     "LICENSE",
 ]

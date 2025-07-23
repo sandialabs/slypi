@@ -1,3 +1,4 @@
 slypi
 sphinxcontrib-programoutput
 pyarrow
+sphinx-copybutton
