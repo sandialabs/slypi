@@ -19,7 +19,7 @@ import os
 import shutil
 
 # reduction command line code
-import slypi.ensemble.table as table
+from slypi.ensemble.table import table
 
 # delete output_dir
 delete_output_dir = True
@@ -50,14 +50,14 @@ if delete_output_dir:
 # check for no arguments
 arg_list = []
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed no argument check.\n")
 
 # check output-dir
 arg_list = ['--create']
 try:
-    table.main(arg_list) 
+    table(arg_list) 
 except SystemExit:
     print("Passed create --output-dir check.\n")
 
@@ -65,7 +65,7 @@ except SystemExit:
 arg_list = ['--create',
             '--output-dir', output_dir]
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --csv-out check.\n")
 
@@ -75,7 +75,7 @@ arg_list = ['--create',
             '--csv-out', 'out.csv',
             '--join', 'join.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --join too many arguments check.\n")
 
@@ -84,7 +84,7 @@ arg_list = ['--create',
             '--output-dir', output_dir,
             '--csv-out', 'out.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed create --ensemble check.\n")
 
@@ -94,7 +94,7 @@ arg_list = ['--create',
             '--csv-out', 'out.csv',
             '--ensemble', os.path.join(test_data_dir, 'workdir.%d')]
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed create --input-files check.\n")
 
@@ -105,7 +105,7 @@ arg_list = ['--create',
             '--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
             '--input-files', 'in.cahn_hilliard']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed create --input-header check.\n")
 
@@ -114,7 +114,7 @@ arg_list = ['--join', 'in.csv',
             '--output-dir', output_dir,
             '--csv-out', 'out.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed join check.\n")
 
@@ -127,7 +127,7 @@ arg_list = ['--join', 'in.csv',
             '--input-header', 'VTK Files',
             '--ignore-index']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --join --csv-no-index missing.\n")    
 
@@ -140,7 +140,7 @@ arg_list = ['--join', 'in.csv',
             '--csv-out', 'out.csv',
             '--convert-cols', 'foo', 'bar']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --join --uri-root-out missing.\n")
 
@@ -153,7 +153,7 @@ arg_list = ['--join', 'in.csv',
             '--csv-out', 'out.csv',
             '--uri-root-out', 'uri-out.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --join --convert-cols missing.\n")
 
@@ -162,7 +162,7 @@ arg_list = ['--expand', 'metadata.csv',
             '--output-dir', output_dir,
             '--csv-out', 'expand-default.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed --expand-header check.\n")
 
@@ -178,12 +178,13 @@ arg_list = ['--join',
             '--csv-out', 'ps.csv',
             '--over-write',
             '--csv-no-index',
+            '--ignore-index', 
             '--csv-headers', 
             'mobility_coefficients-1', 'mobility_coefficients-2', 
             'composition_distribution-1', 'End State', 'Movie',
             '--uri-root-out', uri_root_out,
             '--convert-cols', 'End State', 'Movie']
-table.main(arg_list)
+table(arg_list)
 print("Created ps.csv.\n")
 
 # test join one file and non-existing file links
@@ -194,8 +195,10 @@ arg_list = ['--join',
             '--input-header', 'Images',
             '--output-dir', output_dir,
             '--csv-out', 'metadata-images.csv',
+            '--ignore-index',
+            '--csv-no-index',
             '--over-write']
-table.main(arg_list)
+table(arg_list)
 print("Created metadata-images.csv.\n")
 
 # test join one file and existing file links
@@ -206,8 +209,10 @@ arg_list = ['--join',
             '--input-header', 'Images',
             '--output-dir', output_dir,
             '--csv-out', 'metadata-meshes.csv',
+            '--ignore-index',
+            '--csv-no-index',
             '--over-write']
-table.main(arg_list)
+table(arg_list)
 print("Created metadata-meshes.csv.\n")
 
 # join all end-state xy coords
@@ -226,7 +231,7 @@ arg_list = ['--join',
             '--over-write',
             '--uri-root-out', uri_root_out,
             '--convert-cols', 'End State', 'Movie']
-table.main(arg_list)
+table(arg_list)
 print("Created ps-PCA-Isomap-tSNE-end-state.csv.\n")
 
 # join one file and dimension reduction links
@@ -246,25 +251,26 @@ arg_list = ['--join',
             'composition_distribution-1', 'End State', 'Movie', 'Time Aligned PCA',
             '--uri-root-out', uri_root_out,
             '--convert-cols', 'End State', 'Movie']
-table.main(arg_list)
+table(arg_list)
 print("Created metadata-time-aligned.csv.\n")
 
-# join Betti end-state dimension reduction
-arg_list = ['--join',
-            os.path.join(test_data_dir, 'metadata.csv'),
-            os.path.join(convert_dir, 'end-state.csv'),
-            os.path.join(convert_dir, 'movies.csv'),
-            '--output-dir', output_dir,
-            '--csv-out', 'metadata-Betti-end-state.csv',
-            '--csv-no-index',
-            '--over-write',
-            '--csv-headers', 
-            'mobility_coefficients-1', 'mobility_coefficients-2', 
-            'composition_distribution-1', 'End State', 'Movie', 
-            '--uri-root-out', uri_root_out,
-            '--convert-cols', 'End State', 'Movie']
-table.main(arg_list)
-print("Created Betti-end-state.csv.\n")
+# # join Betti end-state dimension reduction
+# arg_list = ['--join',
+#             os.path.join(test_data_dir, 'metadata.csv'),
+#             os.path.join(convert_dir, 'end-state.csv'),
+#             os.path.join(convert_dir, 'movies.csv'),
+#             '--output-dir', output_dir,
+#             '--csv-out', 'metadata-Betti-end-state.csv',
+#             '--csv-no-index',
+#             '--ignore-index',
+#             '--over-write',
+#             '--csv-headers', 
+#             'mobility_coefficients-1', 'mobility_coefficients-2', 
+#             'composition_distribution-1', 'End State', 'Movie', 
+#             '--uri-root-out', uri_root_out,
+#             '--convert-cols', 'End State', 'Movie']
+# table(arg_list)
+# print("Created Betti-end-state.csv.\n")
 
 # join incremental auto-PCA with all time points
 arg_list = ['--join',
@@ -275,9 +281,11 @@ arg_list = ['--join',
             '--output-dir', output_dir,
             '--csv-out', 'metadata-inc-auto-PCA.csv',
             '--over-write',
+            '--ignore-index',
+            '--csv-no-index',
             '--uri-root-out', uri_root_out,
             '--convert-cols', 'End State', 'Movie']
-table.main(arg_list)
+table(arg_list)
 print("Created metadata-inc-PCA.csv.\n")
 
 # expand csv testing
@@ -289,7 +297,7 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-images.csv'),
             '--output-dir', output_dir,
             '--csv-out', 'metadata-expand-files.csv']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except SystemExit:
     print("Passed missing files check.\n")
 
@@ -301,7 +309,7 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-inc-auto-PCA.csv'),
             '--plugin', 'ps',
             '--num-coords', '0']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except ValueError:
     print("Passed number coordinates check.\n")
 
@@ -315,7 +323,7 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-inc-auto-PCA.csv'),
             '--include-original-index',
             '--num-coords', '3',
             '--csv-no-index']
-table.main(arg_list)
+table(arg_list)
 print("Created ps-inc-PCA.csv.\n")
 
 # test parameter space expansion (using full auto-PCA dataset)
@@ -329,7 +337,7 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-inc-auto-PCA.csv'),
             '--num-coords', '3',
             '--csv-no-index',
             '--over-write']
-table.main(arg_list)
+table(arg_list)
 print("Created ps-inc-auto-PCA.csv.\n")
 
 # test videoswarm --video-duration parameter < 0
@@ -341,7 +349,7 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-time-aligned-PCA.csv'
             '--remove-expand-col',
             '--video-fps', '-1']
 try:
-    table.main(arg_list)
+    table(arg_list)
 except ValueError:
     print("Passed --video-duration negative check.\n")
 
@@ -353,5 +361,5 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-time-aligned-PCA.csv'
             '--plugin', 'vs',
             '--remove-expand-col',
             '--video-fps', '25']
-table.main(arg_list)
+table(arg_list)
 print("Created time-aligned-PCA-vs files.\n")

@@ -21,7 +21,7 @@ authors = [
   {email = "smartin@sandia.gov"},
 ]
 readme = "README.md"
-version = "1.0.6"
+version = "1.0.7"
 license-files = [
     "LICENSE",
 ]
@@ -33,7 +33,7 @@ classifiers = [
 dependencies = ["requests", "requests-kerberos",
                 "numpy", "scikit-learn", 
                 "pandas", "meshio", "imageio[ffmpeg]",
-                "matplotlib", "ipyparallel",
+                "matplotlib", "ipyparallel", "cloudpickle",
                 "umap-learn", "pyarrow"]
 
 [project.optional-dependencies]

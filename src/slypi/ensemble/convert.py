@@ -16,6 +16,8 @@ import argparse
 # logging and error handling
 import logging
 import sys
+import os
+from pathlib import Path
 
 # miscellaneous calculations
 import math
@@ -162,9 +164,9 @@ def convert_ensemble (plugin, log ,args, ensemble_table, ensemble_dirs, mirror_d
     for i in range(0, num_ensemble_dirs, num_engines):
 
         # get block of simuilations
-        block_dirs = [ensemble_dirs[j] 
+        block_dirs = [os.path.abspath(ensemble_dirs[j])
             for j in range(i, i + num_engines) if j < num_ensemble_dirs]
-        mirror_block = [mirror_dirs[j] 
+        mirror_block = [os.path.abspath(mirror_dirs[j] )
             for j in range(i, i + num_engines) if j < num_ensemble_dirs]
 
         # push out jobs per engine
@@ -186,13 +188,22 @@ def convert_ensemble (plugin, log ,args, ensemble_table, ensemble_dirs, mirror_d
             # get returned values
             files_to_convert = async_result.get()[0]
             files_created = async_result.get()[1]
-            files_converted = async_result.get()[2]
+            file_converted = async_result.get()[2]
+
+            # convert back to relative paths
+            cwd = os.getcwd()
+            files_to_convert = [Path(os.path.relpath(file, cwd)).as_posix()
+                                for file in files_to_convert]
+            files_created = [Path(os.path.relpath(file, cwd)).as_posix()
+                             for file in files_created]
+            file_converted = Path(os.path.relpath(file_converted, cwd)).as_posix()
+            ensemble_dir = Path(os.path.relpath(block_dirs[j], cwd)).as_posix()
 
             # log progress
-            progress_report(log, files_to_convert, block_dirs[j], files_created)
-
+            progress_report(log, files_to_convert, ensemble_dir, files_created)
+            
             # save csv results
-            files_written.append(files_converted)
+            files_written.append(file_converted)
 
         # clean up ipyparallel
         rc.purge_everything()

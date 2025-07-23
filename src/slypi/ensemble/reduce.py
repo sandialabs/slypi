@@ -218,7 +218,7 @@ def get_sim_files (log, args, ensemble_dirs, mirror_dirs, ensemble_table):
 
     # get simulations files in parallel if requested
     sim_files = ensemble_table.ensemble_files(ensemble_dirs, args.parallel) 
-
+    
     # count number of files per ensemble
     file_counts = []
     for i in range(len(ensemble_dirs)):

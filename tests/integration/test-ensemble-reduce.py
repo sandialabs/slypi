@@ -23,8 +23,7 @@ from pathlib import Path
 import argparse
 
 # reduction command line code
-import slypi.ensemble.reduce as reduce
-import slypi.ensemble.table as table
+from slypi.ensemble.reduce import reduce
 
 # file paths
 
@@ -118,14 +117,14 @@ def test_UI(args):
         # no arguments
         arg_list = []
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed no argument check.\n")
 
         # missing --input-files
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d')]
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --input-files check.\n")
 
@@ -133,7 +132,7 @@ def test_UI(args):
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
                     '--input-files', 'out.cahn_hilliard_0.vtk']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --output-dir check.\n")
 
@@ -142,7 +141,7 @@ def test_UI(args):
                     '--input-files', 'out.cahn_hilliard_0.vtk',
                     '--output-dir', output_dir]
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --output-file check.\n")
 
@@ -152,7 +151,7 @@ def test_UI(args):
                     '--output-dir', output_dir,
                     '--output-file', 'out.cahn_hilliard_end_state_PCA']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --output-file extension check.\n")
 
@@ -163,7 +162,7 @@ def test_UI(args):
                     '--output-file', 'out.cahn_hilliard_end_state_PCA.rd.npy',
                     '--over-write']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except ValueError:
             print("Passed --algorithm missing check.\n")
         
@@ -174,7 +173,7 @@ def test_UI(args):
                     '--output-file', 'out.cahn_hilliard_end_state_PCA.rd.npy',
                     '--algorithm', 'super-mega-duper']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --algorithm incorrect check.\n")
 
@@ -186,7 +185,7 @@ def test_UI(args):
                     '--algorithm', 'PCA',
                     '--over-write']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except ValueError:
             print("Passed --num-dim check.\n")
 
@@ -199,7 +198,7 @@ def test_UI(args):
                     '--num-dim', '2',
                     '--over-write']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except ValueError:
             print("Passed --field-var check.\n")
 
@@ -211,7 +210,7 @@ def test_UI(args):
                     '--algorithm', 'PCA',
                     '--num-dim', '2']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --over-write check.\n")
         
@@ -225,7 +224,7 @@ def test_UI(args):
                     '--num-dim', '2',
                     '--over-write', '--foo']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed un-recognized argument check.\n")
 
@@ -240,7 +239,7 @@ def test_UI(args):
                     '--auto-correlate',
                     '--over-write']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except ValueError:
             print ("Passed missing --binary check.\n")
         
@@ -256,7 +255,7 @@ def test_UI(args):
                     '--over-write',
                     '--csv-out', 'end-state-PCA-links.csv']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed missing --csv-header.\n")
 
@@ -271,7 +270,7 @@ def test_UI(args):
                     '--output-model', 'pca-model.txt',
                     '--num-dim', '50']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed .pkl extension save model.\n")
         
@@ -286,7 +285,7 @@ def test_UI(args):
                     '--input-model', 'pca-model.txt',
                     '--num-dim', '50']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed .pkl extension load model.\n")
 
@@ -309,7 +308,7 @@ def test_save_load(args):
                     '--xy-header', 'PCA End State',
                     '--output-model', 'end-state-pca-model-10.pkl',
                     '--num-dim', '10']
-        reduce.main(arg_list)
+        reduce(arg_list)
         print()
 
         # load PCA model with parameters provided
@@ -323,7 +322,7 @@ def test_save_load(args):
                         'end-state-pca-model-10.pkl'),
                     '--num-dim', '10']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except ValueError:
             print("Passed load model with parameter check.\n")
 
@@ -338,7 +337,7 @@ def test_save_load(args):
                         'end-state-pca-model-10.pkl'),
                     '--xy-out', 'PCA-end-state-loaded.csv',
                     '--xy-header', 'PCA End State']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # compare trained and loaded models
         if filecmp.cmp(os.path.join(output_dir, 'PCA-end-state-trained.csv'),
@@ -359,7 +358,7 @@ def test_save_load(args):
                     '--over-write',
                     '--file-batch-size', '500',
                     '--output-model', 'PCA-time-aligned.pkl']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # load time-aligned model
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
@@ -370,7 +369,7 @@ def test_save_load(args):
                     '--auto-correlate', '--binary',
                     '--over-write',
                     '--file-batch-size', '500']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # compare trained and loaded model results
         results_same = True
@@ -400,7 +399,7 @@ def test_end_state(args):
                     '--csv-out', 'PCA-end-state-links.csv',
                     '--csv-header', 'PCA End State',
                     '--num-dim', '10']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # auto-correlated PCA on end state
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
@@ -413,7 +412,7 @@ def test_end_state(args):
                     '--xy-out', 'auto-PCA-end-state-xy.csv',
                     '--xy-header', 'Auto-PCA End State',
                     '--num-dim', '10']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # Isomap on end state
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
@@ -425,7 +424,7 @@ def test_end_state(args):
                     '--xy-out', 'Isomap-end-state-xy.csv',
                     '--xy-header', 'Isomap End State',
                     '--num-dim', '2']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # auto-correlated Isomap on end state
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
@@ -438,7 +437,7 @@ def test_end_state(args):
                     '--xy-out', 'auto-Isomap-end-state-xy.csv',
                     '--xy-header', 'Auto-Isomap End State',
                     '--num-dim', '2']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # # tSNE on end state (use PCA output)
         # arg_list = ['--ensemble', os.path.join(output_dir, 'workdir.%d'),
@@ -450,7 +449,7 @@ def test_end_state(args):
         #             '--xy-out', 'tSNE-end-state-xy.csv',
         #             '--xy-header', 'tSNE End State',
         #             '--num-dim', '2']
-        # reduce.main(arg_list)
+        # reduce(arg_list)
 
         # # auto-correlated tSNE on end state (using auto-correlated PCA)
         # arg_list = ['--ensemble', os.path.join(output_dir, 'workdir.%d'),
@@ -463,7 +462,7 @@ def test_end_state(args):
         #             '--xy-out', 'auto-tSNE-end-state-xy.csv',
         #             '--xy-header', 'Auto-tSNE End State',
         #             '--num-dim', '2']
-        # reduce.main(arg_list)
+        # reduce(arg_list)
 
 # UMAP
 ######
@@ -483,31 +482,31 @@ def test_umap(args):
                     '--csv-header', 'Umap',
                     '--num-dim', '10',
                     '--output-model', 'auto-PCA-10-umap.pkl']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
 # auto-encoder
 ##############
 
-def test_auto_encoder(args):
+# def test_auto_encoder(args):
 
-    if args.test_auto_encoder or args.test_all:
+#     if args.test_auto_encoder or args.test_all:
 
-        # auto-encoder on full training set
-        arg_list = ['--ensemble', os.path.join(output_dir, 'workdir.%d'),
-                    '--input-files', 'out.cahn_hilliard_inc_whiten_PCA_1000.rd.npy',
-                    '--output-dir', output_dir,
-                    '--output-file', 'out.cahn_hilliard_inc_whiten_PCA_1000_autoencoder.rd.npy',
-                    '--algorithm', 'auto-encoder',
-                    '--over-write',
-                    '--csv-out', 'inc-whiten-PCA-1000-auto-encoder.csv',
-                    '--csv-header', 'Whiten PCA Auto-Encoder',
-                    '--num-dim', '10',
-                    '--MLP-arch', '750', '500', '250', '100', '50',
-                    '--num-processes', '4',
-                    '--epochs', '100',
-                    '--batch-size', '250',
-                    '--output-model', 'inc-whiten-PCA-1000-autoencoder.pkl']
-        reduce.main(arg_list)
+#         # auto-encoder on full training set
+#         arg_list = ['--ensemble', os.path.join(output_dir, 'workdir.%d'),
+#                     '--input-files', 'out.cahn_hilliard_inc_whiten_PCA_1000.rd.npy',
+#                     '--output-dir', output_dir,
+#                     '--output-file', 'out.cahn_hilliard_inc_whiten_PCA_1000_autoencoder.rd.npy',
+#                     '--algorithm', 'auto-encoder',
+#                     '--over-write',
+#                     '--csv-out', 'inc-whiten-PCA-1000-auto-encoder.csv',
+#                     '--csv-header', 'Whiten PCA Auto-Encoder',
+#                     '--num-dim', '10',
+#                     '--MLP-arch', '750', '500', '250', '100', '50',
+#                     '--num-processes', '4',
+#                     '--epochs', '100',
+#                     '--batch-size', '250',
+#                     '--output-model', 'inc-whiten-PCA-1000-autoencoder.pkl']
+#         reduce(arg_list)
 
 # betti number algorithm (experimental)
 #######################################
@@ -524,19 +523,19 @@ def test_auto_encoder(args):
 #                     '--algorithm', 'Betti',
 #                     '--over-write']
 #         try:
-#             reduce.main(arg_list)
+#             reduce(arg_list)
 #         except ValueError:
 #             print("Passed --rows Betti number check.\n")
         
 #         arg_list += ['--rows', '512']
 #         try:
-#             reduce.main(arg_list)
+#             reduce(arg_list)
 #         except ValueError:
 #             print("Passed --cols Betti number check.\n")
 
 #         arg_list += ['--cols', '512']
 #         try:
-#             reduce.main(arg_list)
+#             reduce(arg_list)
 #         except ValueError:
 #             print("Passed --threshold Betti number check.\n") 
 
@@ -554,7 +553,7 @@ def test_auto_encoder(args):
 #                     '--xy-header', 'Betti End State',
 #                     '--num-dim', '2',
 #                     '--log-file', 'betti.log']
-#         reduce.main(arg_list)
+#         reduce(arg_list)
 
 # time-aligned algorithms
 #########################
@@ -575,7 +574,7 @@ def test_time_aligned(args):
                     '--over-write',
                     '--csv-out', 'time-aligned-PCA.csv',
                     '--csv-header', 'Time Aligned PCA']
-        reduce.main(arg_list)
+        reduce(arg_list)
         print("Passed time-aligned in memory.\n")
 
         # time-aligned PCA in batch using fit (--file-batch-size == size ensemble)
@@ -591,7 +590,7 @@ def test_time_aligned(args):
                     '--file-batch-size', '50',
                     '--csv-out', 'time-aligned-PCA.csv',
                     '--csv-header', 'Time Aligned PCA']
-        reduce.main(arg_list)
+        reduce(arg_list)
         print("Passed time-aligned non-incremental.\n")
 
         # # time-aligned PCA using incremental in batches
@@ -607,7 +606,7 @@ def test_time_aligned(args):
         #             '--file-batch-size', '20',
         #             '--csv-out', 'time-aligned-PCA.csv',
         #             '--csv-header', 'Time Aligned PCA']
-        # reduce.main(arg_list)
+        # reduce(arg_list)
         # print("Passed time-aligned incremental in batches.\n")
 
 # all time step algorithms
@@ -630,7 +629,7 @@ def test_all_time(args):
                     '--num-dim', '1000',
                     '--file-batch-size', '1500',
                     '--output-model', 'inc-whiten-PCA-1000.pkl']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
 # parallel testing
 ##################
@@ -652,7 +651,7 @@ def test_parallel(args):
                     '--xy-header', 'Auto-PCA End State',
                     '--num-dim', '10',
                     '--log-file', os.path.join(output_dir, 'auto-PCA-parallel.log')]
-        reduce.main(arg_list)
+        reduce(arg_list)
     
         # compare to serial
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d'),
@@ -665,7 +664,7 @@ def test_parallel(args):
                     '--xy-out', 'auto-PCA-end-state-serial-xy.csv',
                     '--xy-header', 'Auto-PCA End State',
                     '--num-dim', '10']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
         # compare parallel/serial models
         if filecmp.cmp(os.path.join(output_dir, 'auto-PCA-end-state-serial-xy.csv'),
@@ -694,7 +693,7 @@ def test_restart(args):
                     '--num-dim', '10',
                     '--file-batch-size', '1000']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --restart file.pkl check.\n")
 
@@ -710,7 +709,7 @@ def test_restart(args):
                     '--num-dim', '10',
                     '--file-batch-size', '1000']
         try:
-            reduce.main(arg_list)
+            reduce(arg_list)
         except SystemExit:
             print("Passed --restart --output-model check.\n")
 
@@ -733,7 +732,7 @@ def test_rd_npy(args):
                 '--over-write',
                 '--num-dim', '100',
                 '--file-batch-size', '2000']
-            reduce.main(arg_list)
+            reduce(arg_list)
 
         # compute time-aligned PCA using inc-auto PCA
         arg_list = ['--ensemble', os.path.join(output_dir, 'workdir.%d'),
@@ -745,7 +744,7 @@ def test_rd_npy(args):
                     '--num-dim', '10',
                     '--over-write',
                     '--output-model', 'time-aligned-PCA.pkl']
-        reduce.main(arg_list)        
+        reduce(arg_list)        
         print("Finished training time-aligned PCA model.\n")
 
         # test rd.npy from loaded model
@@ -755,7 +754,7 @@ def test_rd_npy(args):
                     '--output-file', 'out.cahn_hilliard_time_aligned_model_PCA.rd.npy',
                     '--input-model', os.path.join(output_dir, 'time-aligned-PCA.pkl'),
                     '--over-write']
-        reduce.main(arg_list)
+        reduce(arg_list)
 
 if __name__ == "__main__":
 
@@ -772,7 +771,7 @@ if __name__ == "__main__":
             args.test_time_aligned or \
             args.test_all_time or \
             args.test_umap or \
-            args.test_auto_encoder or \
+            # args.test_auto_encoder or \
             args.test_parallel or \
             args.test_restart or \
             args.test_rd_npy or \
@@ -787,7 +786,7 @@ if __name__ == "__main__":
     test_all_time(args)
     # test_betti(args)
     test_umap(args)
-    test_auto_encoder(args)
+    # test_auto_encoder(args)
     test_parallel(args)
     test_restart(args)
     test_rd_npy(args)

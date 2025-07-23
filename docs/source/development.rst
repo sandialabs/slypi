@@ -27,7 +27,7 @@ setup uses a docker container.
 
 .. code-block:: bash
 
-   $ python tests/integration/test-slypi.py
+   python tests/integration/test-slypi.py
 
 The results of this script are uploads of various models to the Slycat server.  The VideoSwarm
 upload script is not tested because it requires file links that generally do not work with a 
@@ -41,7 +41,7 @@ using ``test-ensemble.py``.
 
 .. code-block:: bash
 
-   $ python tests/unit/test-ensemble.py
+   python tests/unit/test-ensemble.py
 
 Other tests for the ensemble are ``test-ensemble-convert.py``, ``test-ensemble-reduce.py``
 and ``test-ensemble-table.py``.  Some of the tests can be slow, so there are options to execute 
@@ -54,23 +54,31 @@ use
 
 .. code-block:: bash
 
-   $ python tests/integration/test-ensemble-table.py
+   python tests/integration/test-ensemble-table.py
 
 To run the parallel tests, you need to have ipyparallel running.  The necessary procedure will
 vary depending on your environment.  If you are running the tests locally, you can use
 
 .. code-block:: bash
 
-   $ ipcluster start --n=4
+   ipcluster start --n=4
 
 from the slypi directory.
 
 test-ensemble-convert.py
 ------------------------
 
+.. code-block:: bash
+
+   python tests/integration/test-ensemble-convert.py --help
+
 .. program-output:: python ../../tests/integration/test-ensemble-convert.py --help
 
 test-ensemble-reduce.py
 -----------------------
+
+.. code-block:: bash
+
+   python tests/integration/test-ensemble-reduce.py --help
 
 .. program-output:: python ../../tests/integration/test-ensemble-reduce.py --help

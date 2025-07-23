@@ -6,7 +6,7 @@ Slycat is a web application for interactive visualization of ensemble data (see 
 
 ## Documentation
 
-Full documentation can be found in the docs folder and can be compiled using Sphinx using
+Full documentation can be found in the docs folder and can be compiled using Sphinx with
 
 ```sh
 make html

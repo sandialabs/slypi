@@ -20,30 +20,54 @@ These utilities interact directly with Slycat, e.g. querying markings or uploadi
 List markings
 ^^^^^^^^^^^^^
 
+.. code-block:: bash
+
+   python -m slypi.util.list_markings --help
+
 .. program-output:: python -m slypi.util.list_markings --help
 
 List Projects
 ^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.list_projects --help
 
 .. program-output:: python -m slypi.util.list_projects --help
     
 Parameter Space 
 ^^^^^^^^^^^^^^^
 
+.. code-block:: bash
+
+   python -m slypi.ps.upload_csv --help
+
 .. program-output:: python -m slypi.ps.upload_csv --help
 
 CCA
 ^^^
+
+.. code-block:: bash
+
+   python -m slypi.cca.upload_csv --help
 
 .. program-output:: python -m slypi.cca.upload_csv --help
 
 Dial-A-Cluster
 ^^^^^^^^^^^^^^
 
+.. code-block:: bash
+
+   python -m slypi.dac.upload_gen --help
+
 .. program-output:: python -m slypi.dac.upload_gen --help
 
 VideoSwarm
 ^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.vs.upload_local --help
 
 .. program-output:: python -m slypi.vs.upload_local --help
 
@@ -58,10 +82,18 @@ file formats.  They can be extended to work with new file formats using plugins.
 table.py
 ^^^^^^^^
 
+.. code-block:: bash
+
+   python -m slypi.ensemble.table --help
+
 .. program-output:: python -m slypi.ensemble.table --help
 
 convert.py
 ^^^^^^^^^^
 
+.. code-block:: bash
+
+   python -m slypi.ensemble.convert --help
+   
 .. program-output:: python -m slypi.ensemble.convert --help
 

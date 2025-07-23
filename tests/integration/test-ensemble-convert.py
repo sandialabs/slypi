@@ -22,8 +22,8 @@ from pathlib import Path
 # arguments
 import argparse
 
-# romans convert utility
-import slypi.ensemble.convert as convert
+# slypi convert utility
+from slypi.ensemble.convert import convert
 
 # file paths
 
@@ -72,7 +72,7 @@ def delete_output_dir(args):
             shutil.rmtree(output_dir)
     
     else:
-        Path.mkdir(output_dir)
+        Path(output_dir).mkdir(parents=True)
 
 # argument parser testing
 #########################
@@ -84,14 +84,14 @@ def test_UI(args):
         # no arguments
         arg_list = []
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed no argument check.\n")
 
         # ensemble only
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.%d')]
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --ensemble only check.\n")
 
@@ -99,7 +99,7 @@ def test_UI(args):
         arg_list = ['--ensemble', os.path.join(test_data_dir, 'workdir.1'),
                     '--input-files', 'out.cahn_hilliard_0.vtk']
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --ensemble and --input-files check.\n")
 
@@ -108,7 +108,7 @@ def test_UI(args):
                     '--input-files', 'out.cahn_hilliard_0.vtk',
                     '--output-dir', os.path.join(output_dir, 'workdir.1')]
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --ensemble, --input-files, and --output-dir check.\n")
 
@@ -118,7 +118,7 @@ def test_UI(args):
                     '--output-dir', os.path.join(output_dir, 'workdir.1'),
                     '--output-format', 'vtk']
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --over-write check.\n")
 
@@ -129,7 +129,7 @@ def test_UI(args):
                     '--output-format', 'npy',
                     '--foo', 'bar']
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --foo bar check.\n")
 
@@ -140,14 +140,14 @@ def test_UI(args):
                     '--output-format', 'npy',
                     '--csv-file', 'foo-bar.csv']
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --csv-file check.\n")
 
         # check --csv-col when using --csv-file
         arg_list = ['--csv-file', os.path.join(test_data_dir, 'metadata.csv')]
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --csv-col check.\n")
 
@@ -158,7 +158,7 @@ def test_UI(args):
                     '--output-format', 'npy',
                     '--csv-out', 'foo-bar.csv']
         try:
-            convert.main(arg_list)
+            convert(arg_list)
         except SystemExit:
             print("Passed --csv-header check.\n")
 
@@ -178,7 +178,7 @@ def test_conversions(args):
                     '--over-write',
                     '--csv-out', 'three-npz.csv',
                     '--csv-header', 'Three NPZ']
-        convert.main(arg_list)
+        convert(arg_list)
 
         # test csv as input, convert .vtk to .npy
         print("Converting .npz to .npy ...")
@@ -187,7 +187,7 @@ def test_conversions(args):
                     '--output-dir', output_dir,
                     '--output-format', 'npy',
                     '--over-write']
-        convert.main(arg_list)
+        convert(arg_list)
 
         # test .npy to .npy
         print("Converting .npy to .npy ...")
@@ -196,7 +196,7 @@ def test_conversions(args):
                     '--output-dir', output_dir,
                     '--output-format', 'npy',
                     '--over-write']
-        convert.main(arg_list)
+        convert(arg_list)
 
         # convert .npy to .jpg
         print("Converting .npy to .jpg ...")
@@ -207,7 +207,7 @@ def test_conversions(args):
                     '--over-write',
                     '--plugin', 'convert',
                     '--suffix', 'phase_field']
-        convert.main(arg_list)
+        convert(arg_list)
 
 # create end state images and movies
 #################################### 
@@ -227,7 +227,7 @@ def test_end_state(args):
                     '--csv-out', 'end-state.csv',
                     '--csv-header', 'End State',
                     '--plugin', 'convert']
-        convert.main(arg_list)
+        convert(arg_list)
 
         # create simulation movies
         print("Creating simulation movie files ...")
@@ -240,7 +240,7 @@ def test_end_state(args):
                     '--csv-out', 'movies.csv',
                     '--csv-header', 'Movie',
                     '--plugin', 'convert']
-        convert.main(arg_list)
+        convert(arg_list)
 
 # parallel testing
 ##################
@@ -261,7 +261,7 @@ def test_parallel(args):
                     '--csv-header', 'End State',
                     '--parallel',
                     '--plugin', 'convert']
-        convert.main(arg_list)
+        convert(arg_list)
 
         # create simulation movies
         print("Creating simulation movie files ...")
@@ -275,7 +275,7 @@ def test_parallel(args):
                     '--parallel',
                     '--plugin', 'convert',
                     '--suffix', 'phase_field']
-        convert.main(arg_list)
+        convert(arg_list)
 
 if __name__ == "__main__":
 

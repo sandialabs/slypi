@@ -384,13 +384,13 @@ class Table:
         Returns:
             sim_files (list): list of list of files matching specifier
         """
-
+    
         # if not parallel, just get all sim files normally
         if not parallel:
             return self._get_sim_files(ensemble_dirs)
-
+              
         # otherwise start parallel version
-
+        
         # parallel operation, using direct view
         rc = Client()
         view = rc.load_balanced_view()
@@ -406,8 +406,8 @@ class Table:
         async_results = []
         for i in range(num_engines):
 
-            # get block of ensemble directories to expand
-            block_dirs = [ensemble_dirs[j] 
+            # get block of ensemble directories to expand, as absolute path for ipyparallel
+            block_dirs = [os.path.abspath(ensemble_dirs[j])
                 for j in range(i*block_size, i*block_size + block_size) if j < num_dirs]
 
             # expand ensemble directories as nodes are available
@@ -424,8 +424,16 @@ class Table:
             # get items in order they were put into queue
             async_result = async_results.pop(0)
 
+            # convert back to relative paths
+            abs_paths = async_result.get()
+            rel_paths = []
+            cwd = os.getcwd()
+            for ap in abs_paths:
+                rel_paths.append([Path(os.path.relpath(p, cwd)).as_posix() 
+                                  for p in ap])
+
             # retrieve data from result
-            sim_files += async_result.get()
+            sim_files += rel_paths
 
         # clean up ipyparallel
         rc.purge_everything()
@@ -437,7 +445,7 @@ class Table:
 
     # get simulation files for a block of ensemble directories
     def _get_sim_files (self, ensemble_dirs):
-
+    
         sim_files = []
         for i in range(len(ensemble_dirs)):
 
@@ -446,7 +454,7 @@ class Table:
 
             # add files to list
             sim_files.append(files_to_convert)
-        
+
         return sim_files
 
     # convert an input file specifier to an output file specifier
@@ -696,7 +704,7 @@ def parse_d_format(log, d_str):
     in_brackets = right_brackets[0]
 
     # check that between brackets has only : or digits
-    if len(re.findall('[^:\-\d]', in_brackets)) > 0:
+    if len(re.findall(r'[^:\-\d]', in_brackets)) > 0:
         log.error('Invalid %d[::] format, ' +
             'can only have integers between "[]": %s' % d_str)
         raise EnsembleSpecifierError(d_str, 'can only have integers between "[]"')
@@ -756,8 +764,7 @@ def parse_d_format(log, d_str):
         raise EnsembleSpecifierError(d_str, 'must have non-zero step between "[]"')
 
     return root, start, stop, step, ext
-
-
+    
 # factory method to combine tables
 def combine (log, tables, ignore_index=False):
     """

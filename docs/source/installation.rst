@@ -45,18 +45,22 @@ You can also install locally (from the slypi directory) with pip from source usi
 
   pip install -e .
 
+
 Note: that for slypi to work, you must have a Slycat server running.  This will 
 probably be an institutional server, but you can also use Docker to run a local 
 instance of Slycat.  See https://slycat.readthedocs.io/en/latest/ for details on 
 setting up a server.
 
-Requirements
-------------
+Optional Dependencies
+---------------------
 
-SlyPI uses Python 3.11.8 (as of this writing), and in addition requires various packages.  These packages should be automatically included when you install via pip.  The packages include numpy, scikit-learn, and pandas, as well as requests and requests-kerberos for authentication.  Dimension reduction related packages including torch and umap-learn.  Slypi U=uses pyMKS to compute autocorrelation for images, although pyMKS is now optional, and can be installed using
+SlyPI uses PyMKS (https://github.com/materialsinnovation/pymks, https://pypi.org/project/pymks/) to compute auto-correlation.  This package doesn't install with versions of Python past 3.11.8, so it is included as an optional dependency.  If you want to use auto-correlation, use
 
 .. code-block:: bash
 
   pip install slypi[auto]
 
-Some SlyPI operations can be run in parallel with the  ipyparallel package.
+Requirements
+------------
+
+SlyPI uses Python 3.11.8 (as of this writing), and in addition requires various packages.  These packages should be automatically included when you install via pip.  The packages include numpy, scikit-learn, and pandas, as well as requests and requests-kerberos for authentication.  Dimension reduction related packages including torch and umap-learn.  Slypi uses pyMKS to compute autocorrelation for images.  Some SlyPI operations can be run in parallel with the  ipyparallel package.

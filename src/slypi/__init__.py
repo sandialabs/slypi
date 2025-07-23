@@ -195,6 +195,13 @@ class ArgumentParser(argparse.ArgumentParser):
     elif arguments.log_level == "critical":
       log.setLevel(logging.CRITICAL)
 
+    # if localhost then set no-verify to true
+    # (docker has no security certificate)
+    if arguments.host == 'https://localhost':
+      if not arguments.no_verify:
+        arguments.no_verify = True
+        log.info("Using --no-verify with https://localhost.")
+
     return arguments
 
 class Connection(object):
@@ -225,23 +232,25 @@ class Connection(object):
     elif not keywords.get("verify"):
       verify = False
 
-    # resolve host alias
-    host_alias = urlparse(host)
-    host_alias = host_alias.netloc
-    try:
-      host_ip = socket.gethostbyname(host_alias)
-      host_name = socket.gethostbyaddr(host_ip)
-      host_name = host_name[0]
-    except:
-      log.error("Could not locate host: %s", (host))
-      sys.exit(1)
+    # # resolve host alias
+    # host_alias = urlparse(host)
+    # host_alias = host_alias.netloc
+    # try:
+    #   host_ip = socket.gethostbyname(host_alias)
+    #   host_name = socket.gethostbyaddr(host_ip)
+    #   host_name = host_name[0]
+    # except:
+    #   log.error("Could not locate host: %s", (host))
+    #   sys.exit(1)
 
     # host and port
     self.host = host
 
     # localhost will alias to docker, which won't work
-    if host != 'https://localhost':
-      self.host = host.replace(host_alias, host_name)
+    # if host != 'https://localhost':
+    #   self.host = host.replace(host_alias, host_name)
+    
+    # set port
     if port:
       self.host = self.host + ':' + port
 

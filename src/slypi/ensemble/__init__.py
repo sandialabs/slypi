@@ -351,7 +351,8 @@ class PluginTemplate:
         for i in range(0, num_files, num_engines):
             
             # get block of files
-            block_files = [batch_files[j] for j in range(i, i + num_engines) if j < num_files]
+            block_files = [os.path.abspath(batch_files[j])
+                for j in range(i, i + num_engines) if j < num_files]
 
             # push out jobs per engine
             async_results = []
@@ -368,7 +369,7 @@ class PluginTemplate:
 
                 # get items in order they were put into queue
                 async_result = async_results.pop(0)
-
+                
                 # retrieve data from result
                 data += async_result.get()
 
@@ -382,7 +383,7 @@ class PluginTemplate:
 
     # helper function to read in a batch of files
     def _get_file_batch(self, batch_files, file_type=None, flatten=True):
-                
+        
         # read all files into list
         data = []
         for i in range(len(batch_files)):

@@ -269,7 +269,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 if output_type == "csv":
 
                     # read tabular.dat file
-                    df = pd.read_csv(file_list[0], sep='\s+')
+                    df = pd.read_csv(file_list[0], sep=r'\s+')
 
                     # pre-pend workdir.x as identification column
                     eval_id = df['%eval_id']
@@ -373,7 +373,7 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 # open a video writer with web browser codecs
                 writer = imageio.get_writer(file_out, format="FFMPEG", mode="I", 
                     fps=self.args.video_fps, output_params=['-force_key_frames', 
-                    '0.0,0.04,0.08', '-vcodec', 'libx264', '-acodec', 'aac'])
+                    '0.0,0.04,0.08']) #, '-vcodec', 'libx264', '-acodec', 'aac'])
 
                 # write frames to movie
                 if not self.args.write_raw_video:
