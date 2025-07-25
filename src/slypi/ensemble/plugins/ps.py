@@ -83,9 +83,11 @@ class Plugin(slypi.ensemble.PluginTemplate):
             # check if pymks is available
             if not pymks:
                 self.log.error("The pymks module has not been installed, " + 
-                               "cannot perform auto-correlation.")
+                                 "cannot perform auto-correlation. " +
+                                 "Use pip install slypi[auto].")
                 raise ValueError("The pymks module has not been installed, " + 
-                                 "cannot perform auto-correlation.")
+                                 "cannot perform auto-correlation. " +
+                                 "Use pip install slypi[auto].")
 
             # check that binary option is enabled
             if not args.binary:

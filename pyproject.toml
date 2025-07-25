@@ -21,7 +21,7 @@ authors = [
   {email = "smartin@sandia.gov"},
 ]
 readme = "README.md"
-version = "1.0.8"
+version = "1.1.0"
 license-files = [
     "LICENSE",
 ]
@@ -41,10 +41,17 @@ auto = [
     # auto-correlation only works for python <= 3.11.8
     "pymks"
 ]
+tdms = [
+    # tdms file support
+    "npTDMS", "natsort"
+]
 
 [project.scripts]
 ps_upload_csv = "slypi.ps.upload_csv:main"
-dac_upload_gen = "slycat.dac.upload_gen:main"
+dac_upload_gen = "slypi.dac.upload_gen:main"
+dac_tdms = "slypi.dac.tdms:main"
+dac_tdms_batches = "slypi.dac.tdms_batches:main"
+dac_run_chart = "slypi.dac.run_chart:main"
 
 [project.urls]
 repository = "https://github.com/sandialabs/slypi"
