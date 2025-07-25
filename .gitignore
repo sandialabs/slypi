@@ -10,3 +10,4 @@ example-data/spinodal-out
 example-data/cars-no-nans.csv
 example-data/cars-pca.csv
 src/slypi/dac/README*
+src/slypi/dac/*.docx

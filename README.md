@@ -207,8 +207,7 @@ folders with the pre-computed distance or PCA matrices.
 
 ## Other Models
 
-Currently, SlyPI supports Slycat CCA and Videoswarm models.  The only Slycat model type
-still unsupported is Time Series.  For examples using CCA and Videoswarm, see the full documentation.
+Currently, SlyPI supports Slycat CCA, DAC, PS, and Videoswarm models.  The only Slycat model type still unsupported is Time Series.  For examples using CCA, DAC, PS, and Videoswarm, see the full documentation.
 
 ## Contact
 Shawn Martin -- smartin@sandia.gov
