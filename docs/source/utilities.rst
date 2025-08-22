@@ -90,9 +90,9 @@ table.py
 
 The table utilities can also be called directly using a python API.  Each of the major functions is split out as described below.
 
-.. autoclass:: slypi.ensemble.table.join_csv
+.. autofunction:: slypi.ensemble.table.join_csv
 
-.. autoclass:: slypi.ensemble.table.convert_uris
+.. autofunction:: slypi.ensemble.table.convert_uris
 
 convert.py
 ^^^^^^^^^^
