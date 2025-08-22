@@ -330,19 +330,19 @@ def join_csv(join_tables, ensemble_spec=None, input_files=None, input_header=Non
     (under the --join option).
 
     Args:
-        (list) join_tables: file names of tables to join
-        (string) ensemble_spec: directory or directories to include in ensemble.
-        (string) input_files: files per ensemble directory to use as input.
-        (string) input_header: name to assign input file header in table
-        (bool) ignore_index: ignore index (first) column when joining tables
-        (bool) no_index: join tables without using index (first) column
-        (string) output_dir: directory to output combined table
-        (string) output_file: output file name (extension agnostic)
-        (bool) output_no_index: do not output index column (if not using ignore_index)
-        (string) output_index_header: index header name
-        (list) output_headers: list of strings of headers to output
-        (list) exclude_output_headers: list of strings of headers to exclude
-        (object) log: logger function, if not supplied will output to screen
+        join_tables (list): file names of tables to join
+        ensemble_spec (string): directory or directories to include in ensemble.
+        input_files (string): files per ensemble directory to use as input.
+        input_header (string): name to assign input file header in table
+        ignore_index (bool): ignore index (first) column when joining tables
+        no_index (bool): join tables without using index (first) column
+        output_dir (string): directory to output combined table
+        output_file (string): output file name (extension agnostic)
+        output_no_index (bool): do not output index column (if not using ignore_index)
+        output_index_header (string): index header name
+        output_headers (list): list of strings of headers to output
+        exclude_output_headers (list): list of strings of headers to exclude
+        log (object): logger function, if not supplied will output to screen
 
     Returns:
         Writes a combined table to the requested file.
@@ -526,14 +526,14 @@ def convert_uris(table_csv, uri_cols=None, uri_root=None,
     Converts file pointers in a table to URIs given a URI root name.
 
     Args:
-        (string) table_csv: file names of table to use
-        (list) uri_cols: list of header names to convert in table
-        (string) uri_root: uri root path for conversion
-        (string) output_dir: directory to output combined table
-        (string) output_file: output file name (extension agnostic)
-        (list) output_headers: list of strings of headers to output
-        (list) exclude_output_headers: list of strings of headers to exclude
-        (object) log: logger function, if none supplied will output to screen
+        table_csv (string): file names of table to use
+        uri_cols (list): list of header names to convert in table
+        uri_root (string): uri root path for conversion
+        output_dir (string): directory to output combined table
+        output_file (string): output file name (extension agnostic)
+        output_headers (list): list of strings of headers to output
+        exclude_output_headers (list): list of strings of headers to exclude
+        log (object): logger function, if none supplied will output to screen
 
     Returns:
         Writes a new table with the URI conversions.

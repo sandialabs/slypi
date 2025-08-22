@@ -289,8 +289,7 @@ convert_uris(os.path.join(output_dir, 'ps-no-index.sly'),
              uri_cols=['End State', 'Movie'],
              uri_root=uri_root_out,
              output_dir=output_dir, 
-             output_file='ps-uri-convert-api.csv',
-             )
+             output_file='ps-uri-convert-api.csv')
 print("Created ps-uri-convet-api.csv\n")
     
 # test join one file and non-existing file links
