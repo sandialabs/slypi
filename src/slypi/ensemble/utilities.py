@@ -78,7 +78,7 @@ class Table:
     # the ensemble information is stored internally using all available
     # information, for example full file names.
     def __init__(self, log, data_frame=None, csv_file=None, ensemble_spec=None, 
-                 file_spec=None, header=None):
+                 file_spec=None, header=None, no_index=False):
 
         # logger to use
         self.log = log
@@ -95,7 +95,10 @@ class Table:
         elif csv_file is not None:
 
             # load csv file into data frame
-            self.table = pd.read_csv(csv_file, index_col=0)
+            if no_index:
+                self.table = pd.read_csv(csv_file)
+            else:
+                self.table = pd.read_csv(csv_file, index_col=0)
 
         # otherwise use ensemble specifier
         elif ensemble_spec is not None:
@@ -766,7 +769,7 @@ def parse_d_format(log, d_str):
     return root, start, stop, step, ext
     
 # factory method to combine tables
-def combine (log, tables, ignore_index=False):
+def combine (log, tables, ignore_index=False, no_index=False):
     """
     Combines multiple tables to create a new table.  Tables are assumed
     to have identical index values and are joined as columns.
@@ -775,11 +778,12 @@ def combine (log, tables, ignore_index=False):
         log (logger object): logger for writing output
         tables (list): list of ensemble tables to combine
         ignore_index (bool): ignore index values and join as rows
+        no_index (bool): assume no index column and join as rows (over-rides ignore_index)
 
     Returns:
         combined_table (Table): ensemble table made up of input tables
     """
-    
+
     # if no tables are given, return empty table
     if len(tables) == 0:
         return Table(log)
@@ -791,8 +795,12 @@ def combine (log, tables, ignore_index=False):
     pd_tables = []
     for table in tables:
 
+        # check if we aren't using indices
+        if no_index:
+            reset_table = table.table
+
         # check that indices are identical
-        if not ignore_index:
+        elif not ignore_index:
             if not np.array_equal(table.table.index.to_numpy(), 
                                   tables[0].table.index.to_numpy()):
                 log.error("Indices do not match -- tables cannot be combined. " +
@@ -809,9 +817,14 @@ def combine (log, tables, ignore_index=False):
     
         # remove Table information, leaving only pandas table
         pd_tables.append(reset_table)
-        
+    
+    if no_index:
+        concat_table = pd.concat(pd_tables, axis=1, join='inner')
+    else:
+        concat_table = pd.concat(pd_tables, axis=1, join='inner', verify_integrity=True)
+
     # concatenate tables
-    return Table(log, data_frame=pd.concat(pd_tables, axis=1, join='inner', verify_integrity=True))
+    return Table(log, data_frame=concat_table)
 
 
 # factory method to explode a table using a column of lists

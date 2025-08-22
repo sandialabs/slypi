@@ -136,6 +136,12 @@ class ArgumentParser(argparse.ArgumentParser):
         # parse arguments
         return argparse.ArgumentParser.parse_known_args(self, list_input)
 
+# TDMS error handling
+class ArgumentError (Exception):
+
+    # exception for TDMS upload problems
+    def __init__(self, message):
+        self.message = message
 
 # starts slypi ensemble logger
 def init_logger(log_file=None, log_level=DEFAULT_LOG_LEVEL):

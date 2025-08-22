@@ -10,7 +10,6 @@
 # 3/23/2021
 
 # standard library imports
-import argparse
 import logging
 import sys
 import os
@@ -21,24 +20,29 @@ import os
 import slypi.ensemble as ensemble
 from slypi.ensemble.utilities import Table as EnsembleTable
 from slypi.ensemble.utilities import combine as ensemble_combine
+from slypi.ensemble import ArgumentError
 
 # set up argument parser
 def init_parser():
 
     # define our own version of the slypi.ensemble parser
-    description = "Manipulates .csv files from ensemble data."
-    parser = ensemble.ArgumentParser (description = description)
+    description = "Creates/manipulates files from ensemble data set."
+    parser = ensemble.ArgumentParser (description=description)
 
     # major csv options (must choose one)
-    parser.add_argument('--create', action="store_true", help="Create ensemble .csv file "
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--create', action="store_true", help="Create ensemble file "
                         "from simulation input decks.")
-    parser.add_argument("--join", nargs="+", help="List of slypi.ensemble .csv files to join horizontally " +
+    group.add_argument("--join", nargs="+", help="List of slypi.ensemble files to join horizontally " +
                         "(first column is assumed to be index).")
-    parser.add_argument("--concat", nargs="+", help="List of slypi.ensemble .csv files to join vertically " +
+    group.add_argument("--concat", nargs="+", help="List of slypi.ensemble files to join vertically " +
                         "(all column headers must be identical).")
-    parser.add_argument('--expand', help='Expand links in .csv file to include data in table.  Uses '
+    group.add_argument('--expand', help='Expand links in input file to include data in table.  Uses '
                         'plugin to expand links.')
-    parser.add_argument('--convert', nargs=1, help="Convert a slypi.ensemble .csv table to " +
+    group.add_argument('--convert-uris', nargs=1, help="Converts columns from the given table to " +
+                       "URIs, columns are specified using --uri-cols, and conversion is " +
+                       "specified using --uri-root.")
+    group.add_argument('--convert', nargs=1, help="Convert a slypi.ensemble table to " +
                         "a final Slycat table (remove source index).")
 
     # create/join csv from ensemble specifier and input files
@@ -56,10 +60,14 @@ def init_parser():
     # join specific options
     parser.add_argument("--ignore-index", action="store_true", default=False, help="Ignore "
                         "index column when joining tables.")
-    parser.add_argument("--convert-cols", nargs="+", help="Converts the given columns using " +
-                        "--uri-root-out when joining tables.")
-    parser.add_argument("--uri-root-out", help="Root name of URI used to transform file " +
-                        "pointers in .csv output file when joining files.  Note that this " +
+    parser.add_argument("--no-index", action="store_true", default=False, help="No index present " +
+                        "in input file, join rows without error checking (note that no output " +
+                        "index is written, over-riding --no-output-index).")
+    
+    # URI conversion information
+    parser.add_argument("--uri-cols", nargs="+", help="Columns with file points to convert to URIs.")
+    parser.add_argument("--uri-root", help="Root name of URI used to transform file " +
+                        "pointers in output file when joining files.  Note that this " +
                         "will only work if the file pointers have a common root.  All paths in " +
                         "this case will be converted to unix paths.")
 
@@ -74,15 +82,15 @@ def init_parser():
 
     # output file information
     parser.add_argument("--output-dir", help="Output directory for any files produced.")
-    parser.add_argument("--csv-out", help="File name of output .csv file.")
-    parser.add_argument("--csv-no-index", action="store_false", default=True,
+    parser.add_argument("--output-file", help="File name of output file.")
+    parser.add_argument("--output-no-index", action="store_false", default=True,
                         help="Do not output the index column.")
-    parser.add_argument("--csv-index-header", default=None, help="Index header name for .csv file " +
+    parser.add_argument("--output-index-header", default=None, help="Index header name for output file " +
                         "(default is None).")
-    parser.add_argument("--csv-headers", nargs='*', help="Output only the given headers to " +
-                        "the .csv file (defaults to all headers).")
-    parser.add_argument("--exclude-csv-headers", nargs='*', help="Exclude the given headers from " +
-                        "the .csv file.")
+    parser.add_argument("--output-headers", nargs='*', help="Output only the given headers to " +
+                        "the output file (defaults to all headers).")
+    parser.add_argument("--exclude-output-headers", nargs='*', help="Exclude the given headers from " +
+                        "the output file.")
 
     # over-write if file exists
     parser.add_argument("--over-write", action="store_true", help="Over-write output "
@@ -91,126 +99,147 @@ def init_parser():
     return parser
 
 # check arguments for create option
-def check_create_arguments(log, args):
+def check_create_arguments(ensemble_spec=None, input_files=None, input_header=None):
 
     # make sure the ensemble argument is present
-    if args.ensemble is None:
-        log.error("Ensemble directories are required.  Please use --ensemble and try again.")
-        sys.exit(1)
+    if ensemble_spec is None:
+        raise ArgumentError("Ensemble directories are required.  Please use --ensemble on " +
+                            "command line, or ensemble_spec= in API and try again.")
     
     # make sure the input argument is present
-    if args.input_files is None:
-        log.error("Input files are required.  Please use --input-files and try again.")
-        sys.exit(1)
+    if input_files is None:
+        raise ArgumentError("Input files are required.  Please use --input-files on command line, " +
+                  "or input_files= in API and try again.")
 
     # make sure the input file header is present
-    if args.input_header is None:
-        log.error("Input header is required.  Please use --input-header and try again.")
-        sys.exit(1)
+    if input_header is None:
+        raise ArgumentError("Input header is required.  Please use --input-header on command line, " +
+                  "or input_header= in API and try again.")
 
 # check arguments for join
-def check_join_arguments(log, args):
+def check_join_arguments(join, ensemble_spec=None, input_files=None, input_header=None,
+                         ignore_index=None, no_index=None, output_no_index=None):
     
     # if only one csv file, must specify ensemble parameters
-    if len(args.join) == 1:
+    if len(join) == 1:
 
-        if args.ensemble is None or \
-           args.input_files is None or \
-           args.input_header is None:
+        if ensemble_spec is None or \
+           input_files is None or \
+           input_header is None:
 
-            log.error("If only using one .csv file, you must specify --ensemble arguments.  " +
-                      "Please use --ensemble, --input-files, --input-header and try again. ")
-            sys.exit(1)
+            raise ArgumentError("If only using one input file, you must specify --ensemble " +
+                                "arguments on the command line, or ensemble_spec= in the API.  " +
+                                "Please use --ensemble, --input-files, --input-header and try again. ")
     
     # if ignoring index column you can't output index
-    if args.ignore_index:
-        if args.csv_no_index:
-            log.error("If --ignore-index is set, you must also set --csv-no-index.")
-            sys.exit(1)
+    if ignore_index:
+        if output_no_index:
+            raise ArgumentError("If --ignore-index is set, you must also set --output-no-index (" +
+                                "or equivalent in API).")
 
-    # check that uri-root and convert-cols are both present, or neither
-    if (args.convert_cols is None and args.uri_root_out is not None) or \
-       (args.convert_cols is not None and args.uri_root_out is None):
-       log.error("Must specify both --convert-cols and --uri-root-out.")
-       sys.exit(1)
-
+    # if using no-index, you can't use --ignore-index
+    if no_index:
+        if ignore_index:
+            raise ArgumentError("You can't use --ignore-index (on the command line, " +
+                                "or ignore_index= in the API) with --no-index.")
 # check arguments for concat
-def check_concat_arguments(log, args):
+def check_concat_arguments(concat, origin_col_names=None, add_origin_col=None):
 
     # if origin names provided, check that there are same number of files
-    if args.origin_col_names is not None:
+    if origin_col_names is not None:
         
         # check that user request an origin column
-        if args.add_origin_col is None:
-            log.error("Must use --add-origin-col if providing origin column names.")
-            sys.exit(1)
+        if add_origin_col is None:
+            raise ArgumentError("Must use --add-origin-col on command line, or " +
+                                "add_origin_col= in API if providing origin column names.")
 
         # check for matching origin names and files to concatenate
-        if len(args.origin_col_names) != len(args.concat):
-            log.error("Number of --origin-col-names does not match number of files to concatenate.")
-            sys.exit(1)
+        if len(origin_col_names) != len(concat):
+            raise ArgumentError("Number of --origin-col-names on command line, or " +
+                                "origin_col_names= in API does not match number of files " +
+                                "to concatenate.")
 
 # check argumetns for expand
-def check_expand_arguments(log, args):
+def check_expand_arguments(expand_header=None):
 
     # check that column to expand is provided
-    if args.expand_header is None:
-        log.error("Please specify --expand-header and try again.")
-        sys.exit(1)
+    if expand_header is None:
+        raise ArgumentError("Please specify --expand-header on command line, or expand_header= " +
+                            "in API and try again.")
 
 # check arguments for convert
-def check_convert_arguments(log, args):
+def check_convert_arguments():
 
     pass
 
-# check command arguments
-def check_arguments(log, args):
+# check convert-uri-cols arguments
+def check_convert_uri_arguments(uri_cols=None, uri_root=None):
+
+    # check that uri-root and convert-cols are both present
+    if not (uri_cols and uri_root):
+       raise ArgumentError("Must specify both --uri-cols and --uri-root on " +
+                           "command line, or uri_cols= and uri_root= in API.")
+
+# check arguments, API version
+def check_API_arguments(output_dir=None, output_file=None, create=None,
+                        join=None, concat=None, expand=None, convert=None,
+                        convert_uris=None, ensemble_spec=None, input_files=None,
+                        input_header=None, ignore_index=None, no_index=None, 
+                        output_no_index=None, origin_col_names=None, add_origin_col=None, 
+                        expand_header=None, uri_cols=None, uri_root=None):
     
-    # convert user selection into True/False is option is selected
-    options_selected = [vars(args)["create"]] + [vars(args)[option] is not None 
-                        for option in ["join", "concat", "expand", "convert"]]
-
-    # check that one option is selected
-    if sum(options_selected) == 0:
-        log.error("Please select one of --create, --join, --concat, --expand, or --convert " +
-                  "and try again.")
-        sys.exit(1)
-
-    # make sure only one option is selected
-    if sum(options_selected) > 1:
-        log.error("Select only one of --create, --join, --concat, --expand, or --convert and try again.")
-        sys.exit(1)
-
     # make sure the output directory is present
-    if args.output_dir is None:
-        log.error("Output directory must be specified.  Please use --output-dir and try again.")
-        sys.exit(1)
+    if output_dir is None:
+        raise ArgumentError("Output directory must be specified.  Please use --output-dir on " +
+                            "command line, or output_dir= in API and try again.")
 
     # make sure the output argument is present
-    if args.csv_out is None:
-        log.error("Name of .csv output file is required.  Please use --csv-out and try again.")
-        sys.exit(1)
-
+    if output_file is None:
+        raise ArgumentError("Name of output file is required.  Please use --output-file on " +
+                            "command line, or output_file= in API and try again.")
+    
     # check create options
-    if args.create:
-        check_create_arguments(log, args)
+    if create:
+        check_create_arguments(ensemble_spec=ensemble_spec, input_files=input_files, 
+                               input_header=input_header)
     
     # check join options
-    if args.join is not None:
-        check_join_arguments(log, args)
+    if join is not None:
+        check_join_arguments(join, ensemble_spec=ensemble_spec, input_files=input_files,
+                            input_header=input_header, ignore_index=ignore_index,
+                            no_index=no_index, output_no_index=output_no_index)
         
     # check concat option
-    if args.concat is not None:
-        check_concat_arguments(log, args)
+    if concat is not None:
+        check_concat_arguments(concat, origin_col_names=origin_col_names, 
+                               add_origin_col=add_origin_col)
 
     # check expand option
-    if args.expand is not None:
-        check_expand_arguments(log, args)
+    if expand is not None:
+        check_expand_arguments(expand_header=expand_header)
 
     # check convert option
-    if args.convert is not None:
-        check_convert_arguments(log, args)
+    if convert is not None:
+        check_convert_arguments()
 
+    # check convert-uri option
+    if convert_uris is not None:
+        check_convert_uri_arguments(uri_cols=uri_cols, uri_root=uri_root)
+
+# check command arguments, command line version
+def check_CLI_arguments(args):
+
+    # pass through to API check
+    check_API_arguments(output_dir=args.output_dir, output_file=args.output_file,
+                        create=args.create, join=args.join, concat=args.concat, expand=args.expand,
+                        convert=args.convert, convert_uris=args.convert_uris,
+                        ensemble_spec=args.ensemble, input_files=args.input_files,
+                        input_header=args.input_header, ignore_index=args.ignore_index,
+                        no_index=args.no_index, output_no_index=args.output_no_index, 
+                        origin_col_names=args.origin_col_names, add_origin_col=args.add_origin_col, 
+                        expand_header=args.expand_header, uri_cols=args.uri_cols, 
+                        uri_root=args.uri_root)
+    
 # create .csv file
 def create_csv(args, log, plugin):
 
@@ -267,53 +296,122 @@ def create_csv(args, log, plugin):
                 input_col.append('')
         
         # check if we should add this column
-        if args.csv_headers is not None:
-            if len(args.csv_headers) > 0:
-                if header not in args.csv_headers:
+        if args.output_headers is not None:
+            if len(args.output_headers) > 0:
+                if header not in args.output_headers:
                     continue
 
         # check if we should exclude this column
-        if args.exclude_csv_headers is not None:
-            if len(args.csv_headers) > 0:
-                if header in args.exclude_csv_headers:
+        if args.exclude_output_headers is not None:
+            if len(args.output_headers) > 0:
+                if header in args.exclude_output_headers:
                     continue
 
         # add column to table
         ensemble_table.add_col(input_col, header)
     
     # write out table
-    csv_out = os.path.join(args.output_dir, args.csv_out)
-    ensemble_table.to_csv(csv_out, index=args.csv_no_index, 
-                          index_label=args.csv_index_header, 
-                          cols=args.csv_headers,
-                          exc_cols=args.exclude_csv_headers)
+    csv_out = os.path.join(args.output_dir, args.output_file)
+    ensemble_table.to_csv(csv_out, index=args.output_no_index, 
+                          index_label=args.output_index_header, 
+                          cols=args.output_headers,
+                          exc_cols=args.exclude_output_headers)
 
-# join csv files
-def join_csv(args, log):
+# join csv files using API, not including uri convert
+def join_csv(join_tables, ensemble_spec=None, input_files=None, input_header=None,
+             ignore_index=False, no_index=False, output_dir=None, output_file=None, 
+             output_no_index=None, output_index_header=None, output_headers=None,
+             exclude_output_headers=None, log=None):
+    """
+    Joins files containing tables, either slypi intermediate format 
+    (with an index column), or standard CSV tables.  The arguments are all optional,
+    supporting different ways to combine tables.  Further descriptions of the
+    arguments and their interactions can be found using table.py --help 
+    (under the --join option).
+
+    Args:
+        (list) join_tables: file names of tables to join
+        (string) ensemble_spec: directory or directories to include in ensemble.
+        (string) input_files: files per ensemble directory to use as input.
+        (string) input_header: name to assign input file header in table
+        (bool) ignore_index: ignore index (first) column when joining tables
+        (bool) no_index: join tables without using index (first) column
+        (string) output_dir: directory to output combined table
+        (string) output_file: output file name (extension agnostic)
+        (bool) output_no_index: do not output index column (if not using ignore_index)
+        (string) output_index_header: index header name
+        (list) output_headers: list of strings of headers to output
+        (list) exclude_output_headers: list of strings of headers to exclude
+        (object) log: logger function, if not supplied will output to screen
+
+    Returns:
+        Writes a combined table to the requested file.
+
+    Note: Does not check for over-writes or existence of directories.
+
+    :Example:
+
+    .. code-block:: python
+
+        from slypi.ensemble.table import join_csv
+
+        join_csv (join_tables=[os.path.join(test_data_dir, 'metadata.csv'), 
+                               os.path.join(convert_dir, 'end-state.csv'),
+                               os.path.join(convert_dir, 'movies.csv')],
+                  output_headers=['mobility_coefficients-1', 'mobility_coefficients-2', 
+                                  'composition_distribution-1', 'End State', 'Movie'],
+                  output_dir=output_dir, output_file='ps-no-index-api.csv',
+                  no_index=True)
+    """
+
+    # double check arguments, in case user is coming directly through API
+    check_API_arguments(join=join_tables, ensemble_spec=ensemble_spec, input_files=input_files,
+                        input_header=input_header, ignore_index=ignore_index, no_index=no_index,
+                        output_dir=output_dir, output_file=output_file,
+                        output_no_index=output_no_index)
+
+    # start up log (to screen), if not given
+    if log is None:
+        ensemble.init_logger()
+        log = logging.getLogger("ensemble.table.join_csv")
+        log.debug("Started join_csv.")
+    
+    # if no-index is used, we will also avoid writing an index
+    if no_index:
+        output_no_index=False
 
     # create ensemble table for each .csv file
     ensemble_tables = []
-    for csv_file in args.join:
-        ensemble_tables.append(EnsembleTable(log, csv_file=csv_file))
+    for csv_file in join_tables:
+        ensemble_tables.append(EnsembleTable(log, csv_file=csv_file, no_index=no_index))
 
     # create extra column if user is using --ensemble
-    if args.ensemble is not None:
-        ensemble_tables.append(EnsembleTable(log, ensemble_spec=args.ensemble, 
-            file_spec=args.input_files, header=args.input_header))
+    if ensemble_spec is not None:
+        ensemble_tables.append(EnsembleTable(log, ensemble_spec=ensemble_spec, 
+            file_spec=input_files, header=input_header))
     
-    # combine tables
-    combined_table = ensemble_combine(log, ensemble_tables, ignore_index=args.ignore_index)
-    
-    # convert file pointers, if requested
-    if args.convert_cols is not None:
-        combined_table.convert_cols(args.convert_cols, args.uri_root_out)
 
+    # combine tables
+    combined_table = ensemble_combine(log, ensemble_tables, 
+                                      ignore_index=ignore_index, no_index=no_index)
+    
     # write out combined table
-    csv_out = os.path.join(args.output_dir, args.csv_out)
-    combined_table.to_csv(csv_out, index=args.csv_no_index, 
-                          index_label=args.csv_index_header,
-                          cols=args.csv_headers, 
-                          exc_cols=args.exclude_csv_headers)
+    csv_out = os.path.join(output_dir, output_file)
+    combined_table.to_csv(csv_out, index=output_no_index, 
+                          index_label=output_index_header,
+                          cols=output_headers, 
+                          exc_cols=exclude_output_headers)
+
+# join csv files
+def join_csv_CLI(args, log):
+    
+    # pass through to API version
+    join_csv(args.join, ensemble_spec=args.ensemble, input_files=args.input_files,
+             input_header=args.input_header, ignore_index=args.ignore_index,
+             no_index=args.no_index, output_dir=args.output_dir, output_file=args.output_file, 
+             output_no_index=args.output_no_index, output_index_header=args.output_index_header,
+             output_headers=args.output_headers, exclude_output_headers=args.exclude_output_headers,
+             log=log)
 
 # concat csv files
 def concat_csv(args, log):
@@ -354,13 +452,12 @@ def concat_csv(args, log):
     concat_table.add_col(origin_col, args.add_origin_col)
 
     # write out new table
-    csv_out = os.path.join(args.output_dir, args.csv_out)
-    concat_table.to_csv(csv_out, index=args.csv_no_index, 
-                          index_label=args.csv_index_header,
-                          cols=args.csv_headers,
-                          exc_cols=args.exclude_csv_headers)
+    csv_out = os.path.join(args.output_dir, args.output_file)
+    concat_table.to_csv(csv_out, index=args.output_no_index, 
+                          index_label=args.output_index_header,
+                          cols=args.output_headers,
+                          exc_cols=args.exclude_output_headers)
     
-
 # expand csv file
 def expand_csv(args, log, plugin):
 
@@ -406,19 +503,86 @@ def expand_csv(args, log, plugin):
             args.expand_header, files_to_expand)
 
         # write out table
-        csv_out = os.path.join(args.output_dir, args.csv_out)
-        exploded_table.to_csv(csv_out, index=args.csv_no_index, 
-                              index_label=args.csv_index_header,
-                              cols=args.csv_headers,
-                              exc_cols=args.exclude_csv_headers)
+        csv_out = os.path.join(args.output_dir, args.output_file)
+        exploded_table.to_csv(csv_out, index=args.output_no_index, 
+                              index_label=args.output_index_header,
+                              cols=args.output_headers,
+                              exc_cols=args.exclude_output_headers)
 
     # otherwise use plugin to read files and expand
     # (plugin can also write additional files, if desired)
     else:
 
         plugin.expand(table_to_expand, args.expand_header, files_to_expand, 
-            output_dir=args.output_dir, csv_out=args.csv_out, csv_no_index=args.csv_no_index, 
-            csv_index_header=args.csv_index_header, csv_headers=args.csv_headers)
+            output_dir=args.output_dir, csv_out=args.output_file, csv_no_index=args.output_no_index, 
+            csv_index_header=args.output_index_header, csv_headers=args.output_headers)
+
+# convert uri columns, API
+def convert_uris(table_csv, uri_cols=None, uri_root=None, 
+                 output_dir=None, output_file=None, 
+                 output_headers=None, exclude_output_headers=None, 
+                 log=None):
+    """
+    Converts file pointers in a table to URIs given a URI root name.
+
+    Args:
+        (string) table_csv: file names of table to use
+        (list) uri_cols: list of header names to convert in table
+        (string) uri_root: uri root path for conversion
+        (string) output_dir: directory to output combined table
+        (string) output_file: output file name (extension agnostic)
+        (list) output_headers: list of strings of headers to output
+        (list) exclude_output_headers: list of strings of headers to exclude
+        (object) log: logger function, if none supplied will output to screen
+
+    Returns:
+        Writes a new table with the URI conversions.
+
+    Note: Does not check for over-writes or existence of directories.
+    
+    :Example:
+
+    .. code-block:: python
+
+        from slypi.ensemble.table import convert_uris
+
+        convert_uris(os.path.join(output_dir, 'ps-no-index.sly'),
+                    uri_cols=['End State', 'Movie'],
+                    uri_root=uri_root_out,
+                    output_dir=output_dir, 
+                    output_file='ps-uri-convert-api.csv')
+    """
+
+    # double check arguments, in case calling from command line
+    check_API_arguments(convert_uris=table_csv, uri_cols=uri_cols, uri_root=uri_root,
+                        output_dir=output_dir, output_file=output_file)
+
+    # start up log (to screen), if not given
+    if log is None:
+        ensemble.init_logger()
+        log = logging.getLogger("ensemble.table.convert_uris")
+        log.debug("Started convert_uris.")
+
+    # read main table
+    table_to_convert = EnsembleTable(log, csv_file=table_csv, no_index=True)
+
+    # convert uris
+    table_to_convert.convert_cols(uri_cols, uri_root)
+
+    # write out converted table
+    csv_out = os.path.join(output_dir, output_file)
+    table_to_convert.to_csv(csv_out, index=False,
+                            cols=output_headers, 
+                            exc_cols=exclude_output_headers)
+    
+# convert uri columns in a table, command line
+def convert_uris_CLI(args, log):
+
+    # pass through to API version
+    convert_uris(args.convert_uris[0], uri_cols=args.uri_cols, 
+                 uri_root=args.uri_root, output_dir=args.output_dir,
+                 output_file=args.output_file, output_headers=args.output_headers,
+                 exclude_output_headers=args.exclude_output_headers, log=log)
 
 # convert slypi.ensemble intermediate csv to normal csv
 def convert_csv(args, log, plugin):
@@ -427,7 +591,7 @@ def convert_csv(args, log, plugin):
     table_to_convert = EnsembleTable(log, csv_file=args.convert[0])
 
     # save to csv without index column
-    table_to_convert.to_csv(args.csv_out, args.output_dir, index=False)
+    table_to_convert.to_csv(args.output_file, args.output_dir, index=False)
 
 # creates a .csv file for remaining ensemble tools to use as input
 # call from Python using arg_list
@@ -453,7 +617,7 @@ def table(arg_list=None):
     log.debug("Started table.")
 
     # check arguments
-    check_arguments(log, args)
+    check_CLI_arguments(args)
     
     # import and initialize plugin
     plugin, unknown_args = ensemble.plugin(args.plugin, arg_list)
@@ -470,7 +634,7 @@ def table(arg_list=None):
         os.makedirs(args.output_dir)
 
     # check if output file exists
-    csv_out = os.path.join(args.output_dir, args.csv_out)
+    csv_out = os.path.join(args.output_dir, args.output_file)
     if os.path.isfile(csv_out):
         if not args.over_write:
             log.error("Output file already exists, use --over-write if you " +
@@ -483,7 +647,7 @@ def table(arg_list=None):
     
     # join csv
     elif args.join is not None:
-        join_csv(args, log)
+        join_csv_CLI(args, log)
 
     # concatenate csv
     elif args.concat is not None:
@@ -492,6 +656,10 @@ def table(arg_list=None):
     # expand csv
     elif args.expand is not None:
         expand_csv(args, log, plugin)
+
+    # convert uri columns
+    elif args.convert_uris is not None:
+        convert_uris_CLI(args, log)
 
     # convert to final version csv
     elif args.convert is not None:
