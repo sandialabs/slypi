@@ -111,7 +111,7 @@ environment variables, they will be ignored.  The proxy flags are used as follow
 (for example):
 
 ```sh
-python -m slypi.list_markings.py --http-proxy http://your.http.proxy --https-proxy https://your.https.proxy
+python -m slypi.list_markings --http-proxy http://your.http.proxy --https-proxy https://your.https.proxy
 ```
 
 The verify flag can be used to pass a security certificate as a command line argument and
@@ -123,15 +123,15 @@ The simplest examples of interacting with the Slycat server issue
 requests for markings and projects, e.g.
 
 ```sh
-python -m slypi.util.list_markings.py
-python -m slypi.util.list_projects.py
+python -m slypi.util.list_markings
+python -m slypi.util.list_projects
 ```
 
 To examine a particular model or project, use
 
 ```sh
-python -m slypi.util.get_model.py mid
-python -m slypi.util.get_project.py pid
+python -m slypi.util.get_model mid
+python -m slypi.util.get_project pid
 ```
 
 where mid and pid are the hash identifiers for a Slycat model
@@ -145,13 +145,13 @@ The SlyPI module provides a command line option for creating Slycat
 models.  For example, to create a sample CCA model using random data, use:
 
 ```sh
-python -m slypi.cca.upload_random.py
+python -m slypi.cca.upload_random
 ```
 
 To create a sample CCA model from a CSV file, use:
 
 ```sh
-python -m slypi.cca.upload_csv.py slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration --project-name "CCA Models"
+python -m slypi.cca.upload_csv slycat-data/cars.csv --input Cylinders Displacement Weight Year --output MPG Horsepower Acceleration --project-name "CCA Models"
 ```
 
 where "slycat-data/cars.csv" is from the slycat-data git repository at

@@ -37,7 +37,7 @@ try:
     import nptdms
     from natsort import natsorted
 except:
-    nptmds = None
+    nptdms = None
 
 import pandas as pd
 
@@ -1041,7 +1041,7 @@ def write_dac_gen(meta_col_names, meta_rows, meta_var_names, meta_vars,
 
     log('Output written to .zip file "' + arguments.output_zip_file + '".')
 
-# helper function to convert a matrix to a comma separatedstring
+# helper function to convert a matrix to a comma separated string
 def mat2str (mat):
 
     return '\n'.join([','.join([str(mat[j][k]).replace('\n', ' ').replace('\r', '').strip()

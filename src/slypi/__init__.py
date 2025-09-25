@@ -225,12 +225,8 @@ class Connection(object):
     # proxies default to ""
     proxies = keywords.get("proxies", {"http": "", "https": ""})
     
-    # certificate verification is disabled unless specifically requested
-    verify = True
-    if keywords.get("verify") == "False":
-      verify = False
-    elif not keywords.get("verify"):
-      verify = False
+    # verfiy set according to arguments
+    verify = keywords.get("verify")
 
     # # resolve host alias
     # host_alias = urlparse(host)
@@ -279,6 +275,11 @@ class Connection(object):
 
       except KerberosExchangeError:
         log.error("Could not find Kerberos ticket, try running 'kinit'.")
+        sys.exit(1)
+      
+      except requests.exceptions.SSLError:
+        log.error ("Could not find valid SSL certificiate, try re-running with --no-verify, " +
+                   "or supply your own certificate with --verify.")
         sys.exit(1)
 
       if response.status_code == 401:
@@ -1674,6 +1675,7 @@ def connect(arguments, **keywords):
   # keywords get passed into the actual requests
 
   # check for --no-verify or security certificate
+  keywords["verify"] = True
   if arguments.no_verify:
     keywords["verify"] = False
   elif arguments.verify is not None:
