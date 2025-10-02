@@ -91,7 +91,7 @@ def _require_array_ranges(ranges):
 
 # print iterations progress bar -- from stack overflow
 # https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-def _print_progress_bar (iteration, total, prefix = '', suffix = '', 
+def print_progress_bar (iteration, total, prefix = '', suffix = '', 
   decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     
     # Call in a loop to create terminal progress bar
@@ -1626,7 +1626,7 @@ class Connection(object):
       
       # print progress bar if desired
       if progress:
-        print('Uploading "%s":' % file_list[fid])
+        print('Uploading "%s".' % file_list[fid])
 
       # split each file into slices
       with open(file_list[fid], "rb") as file:
@@ -1643,8 +1643,8 @@ class Connection(object):
           file_slices_uploaded[fid] += 1
 
           if progress:
-            _print_progress_bar(file_slices_uploaded[fid], file_slices_to_upload[fid], 
-              prefix = 'Progress:', suffix = 'Complete', length = 50)
+            print_progress_bar(file_slices_uploaded[fid], file_slices_to_upload[fid], 
+              prefix = 'Uploading:', suffix = 'Complete', length = 50)
 
     # finish upload
     self.post_upload_finished(uid, file_slices_uploaded)
