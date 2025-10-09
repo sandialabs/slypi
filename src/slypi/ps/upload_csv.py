@@ -248,7 +248,7 @@ def create_model (arguments, log):
         modified = []
 
         # strip prefixes
-        for uri in df[header].values:
+        for uri in data[header].values:
           uri = urlparse.urlparse(uri)
           hostname = uri.netloc
           path = os.path.join(*([os.path.abspath(os.path.dirname(arguments.file))] + 
