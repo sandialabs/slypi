@@ -402,7 +402,7 @@ class Connection(object):
     # log any errors to slypi
     except:
       log.debug(log_message)
-      log.error("%s" % log_message)
+      log.error("(request) %s" % log_message)
       raise
 
   #######################################################################

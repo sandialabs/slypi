@@ -138,13 +138,15 @@ def upload_model (arguments, parser, parms, file_list, progress=True):
     while not model_done:
 
         # wait
-        time.sleep(3)
+        time.sleep(5)
 
         # get progress from server
         try:
             model_progress = connection.get_model_parameter(mid, 'dac-polling-progress')
         except:
+            log.info("Reconnecting ...")
             connection = slypi.connect(arguments)
+            model_percent_done = 0
 
         # update progress bar
         model_progress[1] = round(model_progress[1])
@@ -156,9 +158,6 @@ def upload_model (arguments, parser, parms, file_list, progress=True):
         # are we done?
         if model_progress[0] == 'Done':
             model_done = True
-
-    # close connection
-    connection.close()
 
     return mid
 
