@@ -65,11 +65,20 @@ def parse_file(file, file_name=False):
     
     # parse data
     data = []
+    inf_detected = False
     for header in df.columns.values:
         if df[header].dtype == "object":
             data.append(df[header].values.astype('unicode'))
         else:
-            data.append(df[header].values.astype(float))
+            column = df[header].values.astype(float)
+
+            # look for inf and replace with nan
+            if numpy.isinf(column).any():
+                print(numpy.where(numpy.isinf(column)))
+                column[numpy.isinf(column)] = numpy.nan
+                inf_detected = True
+
+            data.append(column)
             
     # check for empty headers (pandas replaced them with 'Unnamed: <Column #>')
     empty_headers = []
@@ -108,7 +117,11 @@ def parse_file(file, file_name=False):
         csv_read_error.append({'type': 'warning', 'message': 'Found NaNs in .csv table.  Pandas converts a variety of null ' + 
                                 "values to NaNs, including blanks, null, None, n/a, and others (see Panda's read_csv "
                                 'for details).  NaNs may be ignored by Slycat algorithms/visualization tools.'})
-        
+    
+    # slycat warning that Infs were discovered
+    if inf_detected:
+        csv_read_error.append({'type': 'warning', 'message': 'Found Infs in .csv table.  Converting to NaNs.'})
+
     # headers may have been changed, need to recompute
     attributes = [dict(name=header, type="float64" 
         if df[header].dtype != "object" else "string") 
