@@ -26,7 +26,7 @@ class TestEnsemble(unittest.TestCase):
     def check_parse_d_format(self, log, test_data):
 
         # parse test string
-        root, start, stop, step, ext = \
+        root, start, stop, step, ext, rem = \
             parse_d_format(log, test_data["str"])
 
         # check that results are as expected
@@ -126,11 +126,14 @@ class TestEnsemble(unittest.TestCase):
         # check for incorrect input options
         
         # check for failure because of two %d
-        test_data = {"str": "example.%d%d.txt"}
-        try:
-            self.check_parse_d_format(log, test_data)
-        except EnsembleSpecifierError:
-            pass
+        test_data = {"str": "example.%d%d.txt",
+                     "root": "example.",
+                     "start": 0,
+                     "stop": None,
+                     "step": 1,
+                     "ext": "",
+                     "rem": "%d.txt"}
+        self.check_parse_d_format(log, test_data)
 
         # check for failure because of two [
         test_data = {"str": "example.%d[[.txt"}

@@ -467,4 +467,4 @@ arg_list = ['--expand', os.path.join(output_dir, 'metadata-time-aligned-PCA.csv'
             '--remove-expand-col',
             '--video-fps', '25']
 table(arg_list)
-print("Created time-aligned-PCA-vs files.\n")
+print("Created time-aligned-PCA-vs files.")

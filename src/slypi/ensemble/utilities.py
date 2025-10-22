@@ -154,7 +154,7 @@ class Table:
     # root, start, stop, step, and ext specify the %d[::] format,
     # and path_ext supplies any trailing sub-directories (in case is_dir==True)
     def _catalog_path_contents(self, path, is_dir, root, 
-        start, stop, step, ext, path_ext=""):
+        start, stop, step, ext, path_ext="", rem=None):
 
         # get contents of directory
         path_contents = os.listdir(path)
@@ -230,11 +230,17 @@ class Table:
         # that files/directories exist
         sorted_catalog_names = []
         for file_or_dir in catalog_name:
-
+            
             # add directories
             if is_dir:
-                if os.path.exists(os.path.join(path, file_or_dir, path_ext)):
-                    sorted_catalog_names.append(os.path.join(path, file_or_dir, path_ext))
+                
+                if rem is None:
+                    if os.path.exists(os.path.join(path, file_or_dir, path_ext)):
+                        sorted_catalog_names.append(os.path.join(path, file_or_dir, path_ext))
+
+                # add back remainder if 2nd %d
+                else:
+                    sorted_catalog_names.append(os.path.join(path, file_or_dir, path_ext + rem))
 
             # add files (including path)
             else:
@@ -261,7 +267,7 @@ class Table:
 
         # parse directory spec, note that if %d is in middle of multiple 
         # directories then dir_ext could include other directories
-        dir_root, start, stop, step, dir_ext = \
+        dir_root, start, stop, step, dir_ext, rem = \
             parse_d_format(self.log, directory_spec)
 
         # in case %d was not given, check that directory exists
@@ -271,8 +277,29 @@ class Table:
             else:
                 return []
 
-        # parse directory specifier into parts path/root%d[::]ext/path_ext
+        # parse directory specifier into parts path/root%d[::]ext/path_ext + rem
+        path_contents = self._catalog_sub_contents(dir_root, start, stop, step, dir_ext, rem)
+        
+        # further work to be done if 2nd %d present
+        if rem:
 
+            # expand each path according to %d in remainder
+            rem_path_contents = []
+            for expand_path in path_contents:
+                dir_root, start, stop, step, dir_ext, rem = \
+                    parse_d_format(self.log, expand_path)
+                sub_path_contents = \
+                    self._catalog_sub_contents(dir_root, start, stop, step, dir_ext, rem)
+                rem_path_contents = rem_path_contents + sub_path_contents
+
+            path_contents = rem_path_contents
+        
+        return path_contents
+
+
+    # helper function for directories which catalogs contents including remainder
+    def _catalog_sub_contents (self, dir_root, start, stop, step, dir_ext, rem):
+        
         # get path of directories and root of spec
         path, root = os.path.split(dir_root)
 
@@ -281,8 +308,10 @@ class Table:
         ext = ext[::-1]
         path_ext = path_ext[::-1]
 
+        # get path contents
         return self._catalog_path_contents(path, True, 
-            root, start, stop, step, ext, path_ext=path_ext)
+            root, start, stop, step, ext, path_ext=path_ext, rem=rem)
+        
 
     # creates output directories, return false if already exist
     def mirror_directories (self, output_dir, ensemble_dirs, over_write):
@@ -361,7 +390,7 @@ class Table:
         path, files = os.path.split(file_spec)
 
         # parse file spec
-        root, start, stop, step, ext = parse_d_format(self.log, files)
+        root, start, stop, step, ext, rem = parse_d_format(self.log, files)
 
         # in case %d was not given, check that file exists
         if step is None:
@@ -371,7 +400,7 @@ class Table:
                 return []
 
         return self._catalog_path_contents(path, False, 
-            root, start, stop, step, ext)
+            root, start, stop, step, ext, rem=rem)
     
     # get all files in an ensemble
     def ensemble_files (self, ensemble_dirs, parallel=False):
@@ -637,6 +666,7 @@ def parse_d_format(log, d_str):
     if %d is given as [::], start=None, stop=None, step=1.
     if %d is given as [::-1], start=None, stop=None, step=-1.
     if %d is given as [:stop] then start=0, stop=None, step=1.
+    if %d occurs more than once, the part including the 2nd %d is returned without processing.
 
     In other words, step==None only if %d is not given, in all other
     cases, step is non-zero, but start, stop might have to be inferred.
@@ -650,7 +680,8 @@ def parse_d_format(log, d_str):
         start (int): start index
         stop (int): stop index
         step (int): step between start and stop
-        ext (string): extension after %d[::]
+        ext (string): extension after %d[::], before 2nd %d occurence
+        rem (string, optional): remainder of string (None if no 2nd %d)
     """
 
     # get root
@@ -658,24 +689,29 @@ def parse_d_format(log, d_str):
 
     # if there is no %d return original string
     if len(d_str_parts) == 1:
-        return d_str, None, None, None, ''
-
-    # if there is more than one %d raise exception
-    if len(d_str_parts) > 2:
-        log.error('Invalid %d[::] format, ' +
-            'can not have more than one "%%d": %s' % d_str)
-        raise EnsembleSpecifierError(d_str, 'can not have more than one "%d"')
+        return d_str, None, None, None, '', None
 
     # seperate root, possibly extension
     root = d_str_parts[0]
     ext = d_str_parts[1]
+    rem = None
+
+    # if there is more than two %d raise exception
+    if len(d_str_parts) == 2:
+        pass
+    elif len(d_str_parts) == 3:
+        rem = "%d" + d_str_parts[2]
+    else:
+        log.error('Invalid %d[::] format, ' +
+            'can not have more than two "%%d": %s' % d_str)
+        raise EnsembleSpecifierError(d_str, 'can not have more than two "%d"')
 
     # split on [ after %d
     left_brackets = ext.split("[")
 
     # if no brackets, return empty range list
     if len(left_brackets) == 1:
-        return root, 0, None, 1, ext
+        return root, 0, None, 1, ext, rem
 
     # if more than one left bracket then error
     if len(left_brackets) > 2:
@@ -766,8 +802,8 @@ def parse_d_format(log, d_str):
             'must have non-zero step between [""]: %s' % d_str)
         raise EnsembleSpecifierError(d_str, 'must have non-zero step between "[]"')
 
-    return root, start, stop, step, ext
-    
+    return root, start, stop, step, ext, rem
+
 # factory method to combine tables
 def combine (log, tables, ignore_index=False, no_index=False):
     """

@@ -402,7 +402,7 @@ class Connection(object):
     # log any errors to slypi
     except:
       log.debug(log_message)
-      log.error("(request) %s" % log_message)
+      # log.error("(request) %s" % log_message)
       raise
 
   #######################################################################
@@ -1204,7 +1204,7 @@ class Connection(object):
       # binary data
       request_buffer = io.BytesIO()
       for chunk in data:
-        request_buffer.write(chunk.tostring(order="C"))
+        request_buffer.write(chunk.tobytes(order="C"))
     else:
 
       # string data
