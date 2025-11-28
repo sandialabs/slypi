@@ -8,6 +8,7 @@
 # standard library imports
 import os
 from pathlib import Path
+import re
 
 # for writing mp4
 import imageio
@@ -343,9 +344,12 @@ class Plugin(slypi.ensemble.PluginTemplate):
                 # remove trailing zeros, if they exist
                 common_prefix = common_prefix.rstrip('0')
 
+                # check if file name has any repeated "."
+                file_out = common_prefix + self.args.suffix + "." + output_type
+                file_out = re.sub('\.+', '.', file_out)
+
                 # join to output directory and add field variable
-                file_out = Path(os.path.join(output_dir, common_prefix +
-                                self.args.suffix + "." + output_type)).as_posix()
+                file_out = Path(os.path.join(output_dir, file_out)).as_posix()
 
             # if one file, change extension to output type
             else:

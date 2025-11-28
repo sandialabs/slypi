@@ -526,7 +526,7 @@ def convert_uris(table_csv, uri_cols=None, uri_root=None,
     Converts file pointers in a table to URIs given a URI root name.
 
     Args:
-        table_csv (string): file names of table to use
+        table_csv (string): file name of table to use
         uri_cols (list): list of header names to convert in table
         uri_root (string): uri root path for conversion
         output_dir (string): directory to output combined table
