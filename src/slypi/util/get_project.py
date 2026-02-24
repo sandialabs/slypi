@@ -7,9 +7,17 @@ import pprint
 import slypi
 
 parser = slypi.ArgumentParser("Get details of project from Slycat server.")
-parser.add_argument("pid", help="The ID of the project to retrieve")
+
+# get either pid or name
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('--project-name', help='Project name to retrieve.')
+group.add_argument('--pid', help='Project ID to retrieve.')
+
 arguments = parser.parse_args()
 
 connection = slypi.connect(arguments)
-project = connection.get_project(arguments.pid)
+if arguments.pid:
+    project = connection.get_project(arguments.pid)
+elif arguments.project_name:
+    project = connection.find_project(arguments.project_name)
 pprint.pprint(project)

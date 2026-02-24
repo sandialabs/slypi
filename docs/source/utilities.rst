@@ -15,7 +15,7 @@ in a list.
 Slycat Interaction
 ------------------
 
-These utilities interact directly with Slycat, e.g. querying markings or uploading models.
+These utilities interact directly with Slycat, e.g. querying markings, adding/removing users, etc.
 
 List markings
 ^^^^^^^^^^^^^
@@ -34,7 +34,57 @@ List Projects
    python -m slypi.util.list_projects --help
 
 .. program-output:: python -m slypi.util.list_projects --help
-    
+
+Get Project
+^^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.get_project --help
+
+.. program-output:: python -m slypi.util.get_project --help
+
+Get Model
+^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.get_model --help
+
+.. program-output:: python -m slypi.util.get_model --help
+
+List Project Members
+^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.list_project_members --help
+
+.. program-output:: python -m slypi.util.list_project_members --help
+
+Add Project Members
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.add_project_members --help
+
+.. program-output:: python -m slypi.util.add_project_members --help
+
+Remove Project Members
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   python -m slypi.util.rm_project_members --help
+
+.. program-output:: python -m slypi.util.rm_project_members --help
+
+Uploading Slycat Models
+-----------------------
+
+These utilities allow users to upload Slycat models.
+
 Parameter Space 
 ^^^^^^^^^^^^^^^
 
