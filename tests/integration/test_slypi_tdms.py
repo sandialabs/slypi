@@ -33,10 +33,10 @@ SLYCAT_CONNECTION = ['--host', 'https://localhost',
                      '--port', '9001', '--no-verify']
 
 # test marking for localhost
-# TEST_MARKING = ['--marking', 'faculty']
+TEST_MARKING = ['--marking', 'faculty']
 
 # qual server
-# SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos', '--no-verify']
+SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos', '--no-verify']
 
 # marking for qual
 TEST_MARKING = ['--marking', 'mna']
