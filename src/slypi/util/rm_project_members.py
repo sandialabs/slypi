@@ -21,10 +21,10 @@ def check_membership (member, acl):
 
     return None
 
-# remove members from list
-def remove_members (arguments, project):
+# remove members from project
+def remove_project_members (arguments, connection, project):
 
-        # remove members
+    # remove members
     members = project['acl']
     for member in arguments.project_users:
 
@@ -35,7 +35,12 @@ def remove_members (arguments, project):
         if member_type is not None:
             members[member_type].remove({'user': member})
     
-    return members
+    # remove members
+    connection.put_project(project['_id'], {'acl': members})
+
+    # update with users removed
+    for user in arguments.project_users:
+        print("Removed " + user + " from " + project['name'] + ".")
 
 # command line entry point
 if __name__ == "__main__":
@@ -46,8 +51,8 @@ if __name__ == "__main__":
     
     # get either pid or name
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--project-name', help='Project name to retrieve.')
-    group.add_argument('--pid', help='Project ID to retrieve.')
+    group.add_argument('--project-name', nargs="+", help='Project name to retrieve.')
+    group.add_argument('--pid', nargs="+", help='Project ID to retrieve.')
     group.add_argument('--all-projects', action="store_true", 
                        help="Apply to all projects where you are an administrator.")
     
@@ -69,21 +74,21 @@ if __name__ == "__main__":
         # get projects
         projects = connection.get_projects()
 
-        # remove members from each project
+        # add members to each project
         for project in projects["projects"]:
-            if {'user': arguments.user} in project['acl']['administrators']:
-                members = remove_members(arguments, project)
-                connection.put_project(project['_id'], {'acl': members})
+            remove_project_members (arguments, connection, project)
         
-    # only modifying a single project
+    # only modifying projects specified
     else:
         
-        # connect by pid or project name for 
+        # add users by project id
         if arguments.pid:
-            project = connection.get_project(arguments.pid)
-        elif arguments.project_name:
-            project = connection.find_project(arguments.project_name)
+            for project_id in arguments.pid:
+                project = connection.get_project(project_id)
+                remove_project_members(arguments, connection, project)
 
-        # remove members and push to project
-        members = remove_members(arguments, project)
-        connection.put_project(project['_id'], {'acl': members})
+        # add users by project name
+        elif arguments.project_name:
+            for project_name in arguments.project_name:
+                project = connection.find_project(project_name)
+                remove_project_members(arguments, connection, project)

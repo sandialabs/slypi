@@ -22,23 +22,32 @@ def check_membership (member, acl):
     return None
 
 # modify a single project
-def modify_project_members (arguments, project):
+def modify_project_members (arguments, connection, project):
 
-    # add members
-    members = project['acl']
-    for member in arguments.project_users:
+    # check if user is an administrator
+    if {'user': arguments.user} in project['acl']['administrators']:
 
-        # is member already in project?
-        member_type = check_membership(member, members)
+        # add members
+        members = project['acl']
+        for member in arguments.project_users:
 
-        # if so, remove
-        if member_type is not None:
-            members[member_type].remove({'user': member})
+            # is member already in project?
+            member_type = check_membership(member, members)
 
-        # add new member of correct type
-        members[arguments.user_type + 's'].append({'user': member})
+            # if so, remove
+            if member_type is not None:
+                members[member_type].remove({'user': member})
 
-    return members
+            # add new member of correct type
+            members[arguments.user_type + 's'].append({'user': member})
+
+        # update project
+        connection.put_project(project['_id'], {'acl': members})
+
+        # update with users added
+        for user in arguments.project_users:
+            print("Added " + user + " (" + arguments.user_type + 
+                  ") to " + project['name'] + ".")
 
 # command line entry point
 if __name__ == "__main__":
@@ -50,8 +59,8 @@ if __name__ == "__main__":
     
     # get either pid or name
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--project-name', help='Project name to retrieve.')
-    group.add_argument('--pid', help='Project ID to retrieve.')
+    group.add_argument('--project-name', nargs="+", help='Project name to retrieve.')
+    group.add_argument('--pid', nargs="+", help='Project ID to retrieve.')
     group.add_argument('--all-projects', action="store_true", 
                        help="Apply to all projects where you are an administrator.")
 
@@ -79,19 +88,20 @@ if __name__ == "__main__":
 
         # add members to each project
         for project in projects["projects"]:
-            if {'user': arguments.user} in project['acl']['administrators']:
-                members = modify_project_members(arguments, project)
-                connection.put_project(project['_id'], {'acl': members})
+            modify_project_members (arguments, connection, project)
         
-    # only modifying a single project
+    # only modifying projects specified
     else:
         
-        # connect by pid or project name for 
+        # add users by project id
         if arguments.pid:
-            project = connection.get_project(arguments.pid)
-        elif arguments.project_name:
-            project = connection.find_project(arguments.project_name)
+            for project_id in arguments.pid:
+                project = connection.get_project(project_id)
+                modify_project_members(arguments, connection, project)
 
-        # add members and push to project
-        members = modify_project_members(arguments, project)
-        connection.put_project(project['_id'], {'acl': members})
+        # add users by project name
+        elif arguments.project_name:
+            for project_name in arguments.project_name:
+                project = connection.find_project(project_name)
+                modify_project_members(arguments, connection, project)
+

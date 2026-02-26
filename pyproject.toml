@@ -35,7 +35,7 @@ dependencies = ["requests", "requests-kerberos",
                 "numpy", "scikit-learn", 
                 "pandas", "meshio", "imageio[ffmpeg]",
                 "matplotlib", "ipyparallel", "cloudpickle",
-                "umap-learn", "pyarrow"]
+                "umap-learn", "pyarrow", "pip-system-certs"]
 
 [project.optional-dependencies]
 auto = [
