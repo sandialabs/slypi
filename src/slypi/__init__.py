@@ -128,7 +128,7 @@ class ArgumentParser(argparse.ArgumentParser):
     * **-\\-no-verify** -- disable https verification.
     * **-\\-file-slice-size** -- maximum number of bytes to upload at once.
     * **-\\-user** -- user name.
-    * **-\\-passowrd** -- user password.
+    * **-\\-password** -- user password.
     * **-\\-kerberos** -- enable kerberos authentication.
     * **-\\-log-level** -- log detail to display.
   """

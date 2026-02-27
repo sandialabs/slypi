@@ -8,6 +8,7 @@
 import os
 import re
 import sys
+import argparse
 
 import numpy as np
 
@@ -16,6 +17,21 @@ import urllib.parse as urlparse
 
 # slycat csv parser
 import slypi.pandas_util
+
+
+# custom type for argparse which lets the user pass in pairs "x,y"
+def parse_pair(s):
+    try:
+        
+        # split into pair using comma
+        pair = tuple([val.strip() for val in s.split(',')])
+        if len(pair) == 2:
+          return pair
+        else:
+          raise argparse.ArgumentTypeError(f"'{s}' is not a valid pair. Use comma-separated strings, e.g., 'x,y'")
+
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"'{s}' is not a valid pair. Use comma-separated strings, e.g., 'x,y'")
 
 # parse command line arguments
 def parser():
@@ -33,6 +49,11 @@ def parser():
     help="Output column names, can't be media columns.")
   parser.add_argument("--categorical-columns", default=[], nargs="*",
     help="Categorical column names, can't be media coluns.")
+  
+  # xy pairs
+  parser.add_argument("--xy-pair", nargs="+", type=parse_pair, 
+                      help="Column pairs to be tagged using [XYpair] notation for Slycat. " +
+                           'Note: pairs should be of the form "<name> X,<name> Y".')
 
   # media columns
   parser.add_argument("--media-columns", default=None, nargs="*", 
@@ -189,6 +210,30 @@ def create_model (arguments, log):
         log('Categorical column "' + cat_col + '" not found in input file.', debug=arguments.debug,
           exception_type=ValueError)
  
+  # check for xy pair columns
+  if arguments.xy_pair is not None:
+
+    # add [XYpair] tags
+    for pair in arguments.xy_pair:
+
+      # check if pair names are in columns
+      if pair[0] not in column_names or pair[1] not in column_names:
+        log('XY pair columns "' + str(pair) + '" not found in input file.', debug=arguments.debug,
+            exception_type=ValueError)
+      
+      # check if pair names are the same (minus last character)
+      if pair[0][:-1].strip() != pair[1][:-1].strip():
+        log('XY pair columns "' + str(pair) + '" doesn''t have common root name.', debug=arguments.debug,
+            exception_type=ValueError)
+        
+      # tag xy columns
+      x_col = column_names.index(pair[0])
+      y_col = column_names.index(pair[1])
+
+      # rename column
+      attributes[x_col]["name"] = "[XYpair X]" + pair[0]
+      attributes[y_col]["name"] = "[XYpair Y]" + pair[1]
+
   # check that media-columns are in headers
   if arguments.media_columns is not None:
     for media_col in arguments.media_columns:
@@ -265,6 +310,8 @@ def create_model (arguments, log):
     log('Output columns: ' + str(arguments.output_columns))
   if arguments.categorical_columns is not None:
     log('Categorical columns: ' + str(arguments.categorical_columns))
+  if arguments.xy_pair is not None:
+    log('XY pairs: ' + str(arguments.xy_pair))
   if arguments.media_columns != []:
     log('Media columns: ' + str(arguments.media_columns))
   if arguments.media_hostname is not None:
