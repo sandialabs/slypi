@@ -7,6 +7,9 @@
 # To run the tests, type:
 # $ python -m unittest test-slypi.py
 #
+# To run a single test, use (for example):
+# $ python -m unittest test_slypi.TestSlypi.test_list_markings
+#
 # Modify SLYCAT_CONNECTION to use a different slycat server.
 # 
 # NOTE: Models are created but not destroyed.
@@ -27,16 +30,15 @@ import slypi.ps.upload_csv as ps_csv
 import slypi.dac.upload_gen as dac_gen
 
 # slycat connection parameters for localhost
-SLYCAT_CONNECTION = ['--host', 'https://localhost', '--user', 'slycat', 
-                     '--password', 'slycat',
-                     '--port', '9001', '--no-verify']
+# SLYCAT_CONNECTION = ['--host', 'https://localhost', '--user', 'slycat', 
+#                     '--password', 'slycat',
+#                     '--port', '9001', '--no-verify']
 
 # test marking for localhost
-TEST_MARKING = ['--marking', 'faculty']
+# TEST_MARKING = ['--marking', 'faculty']
 
 # qual server
-SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos', 
-                     '--no-verify']
+SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos']
 
 # marking for qual
 TEST_MARKING = ['--marking', 'mna']
@@ -53,6 +55,9 @@ TEST_PCA_COMPS = ['--num-PCA-comps', '10', '--model-name', 'DAC PCA']
 # parameter space files
 CARS_FILE = ['example-data/cars.csv']
 
+# 
+CB_FILE = ["example-data/cb-tabular.dat.csv"]
+
 # DAC PCA weather file
 DAC_PCA_FILE = ['example-data/weather-dac-gen-pca.zip']
 
@@ -65,6 +70,12 @@ PS_CARS_CATEGORICAL = ['--categorical-columns', 'Cylinders']
 CCA_CARS_INPUT = ['--input-columns', 'Cylinders', 'Displacement', 'Weight',
               'Year']
 CCA_CARS_OUTPUT = ['--output-columns', 'MPG', 'Horsepower', 'Acceleration']
+
+# input/output columns for CB data file
+CCA_CB_INPUT = ['--input-columns', 'impact_speed_mps', 'coef_friction', 'eqps_thold']
+CCA_CB_OUTPUT = ['--output-columns', 'max_hourglass_energy', 'max_fillAccel_Y',
+                 'max_HI_ratio', 'max_HE_ratio', 'tot_failed_bolts', 'model_failure_time_bolts',
+                 'is_breached']
 
 # turn off warnings for all tests
 def ignore_warnings(test_func):
@@ -141,6 +152,20 @@ class TestSlypi(unittest.TestCase):
         cca_parser = cca_csv.parser()
         arguments = cca_parser.parse_args(SLYCAT_CONNECTION + CARS_FILE + CCA_CARS_INPUT + 
                                           CCA_CARS_OUTPUT + TEST_MARKING + TEST_PROJECT)
+        arguments, connection = self.connect_to_server(arguments)
+        cca_csv.create_model(arguments, cca_csv.log)
+
+    @ignore_warnings
+    def test_cca_csv_constant_col(self):
+        """
+        Test CCA upload with a constant column.
+        """
+
+        # create CCA model
+        cca_parser = cca_csv.parser()
+        arguments = cca_parser.parse_args(SLYCAT_CONNECTION + CB_FILE + CCA_CB_INPUT + 
+                                          CCA_CB_OUTPUT + TEST_MARKING + TEST_PROJECT)
+
         arguments, connection = self.connect_to_server(arguments)
         cca_csv.create_model(arguments, cca_csv.log)
 

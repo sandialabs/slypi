@@ -7,6 +7,7 @@
 
 import slypi
 import os
+import numpy as np
 
 # slycat csv parser
 import slypi.pandas_util
@@ -90,6 +91,13 @@ def upload_model(arguments, attributes, dimensions, data, inputs, outputs, log):
 
   return mid
 
+# check for constant value column
+def check_const_col(column):
+
+  is_constant = np.all(column == column[0])
+
+  return is_constant
+
 # create CCA model
 def create_model(arguments, log):
 
@@ -153,6 +161,16 @@ def create_model(arguments, log):
   for output in outputs:
     if column_types[output] != "float64":
       raise Exception("Cannot analyze non-numeric output: %s" % column_names[output])
+  
+  # check for constant columns
+  for input in reversed(inputs):
+    if check_const_col (columns[input]):
+      log('Warning: Ignoring constant input column "' + column_names[input] + '".')
+      inputs.remove(input)
+  for output in reversed(outputs):
+    if check_const_col (columns[output]):
+      log('Warlning: Ignoring constant output column "' + column_names[output] + '".')
+      outputs.remove(output)
 
   # upload model
   mid = upload_model (arguments, attributes, dimensions, data, inputs, outputs, log)
