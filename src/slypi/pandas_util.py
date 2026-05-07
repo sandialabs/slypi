@@ -67,7 +67,7 @@ def parse_file(file, file_name=False):
     data = []
     inf_detected = False
     for header in df.columns.values:
-        if df[header].dtype == "object":
+        if df[header].dtype == "str":
             data.append(df[header].values.astype('unicode'))
         else:
             column = df[header].values.astype(float)
@@ -124,7 +124,7 @@ def parse_file(file, file_name=False):
 
     # headers may have been changed, need to recompute
     attributes = [dict(name=header, type="float64" 
-        if df[header].dtype != "object" else "string") 
+        if df[header].dtype != "str" else "string") 
         for header in df.columns]
     
     # return data and errors

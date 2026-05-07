@@ -169,7 +169,7 @@ def create_model(arguments, log):
       inputs.remove(input)
   for output in reversed(outputs):
     if check_const_col (columns[output]):
-      log('Warlning: Ignoring constant output column "' + column_names[output] + '".')
+      log('Warning: Ignoring constant output column "' + column_names[output] + '".')
       outputs.remove(output)
 
   # upload model

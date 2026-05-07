@@ -21,11 +21,11 @@ authors = [
   {email = "smartin@sandia.gov"},
 ]
 readme = "README.md"
-version = "1.3.0"
+version = "1.3.2"
 license-files = [
     "LICENSE",
 ]
-requires-python = ">=3.0,<3.14"
+requires-python = ">=3.0"
 
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -40,7 +40,7 @@ dependencies = ["requests", "requests-kerberos",
 [project.optional-dependencies]
 auto = [
     # auto-correlation only works for python <= 3.11.8
-    "pymks"
+    "pymks; python_version <= '3.11.8'"
 ]
 tdms = [
     # tdms file support
