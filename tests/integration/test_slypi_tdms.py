@@ -5,7 +5,9 @@
 # $ python test_slypi_tdms
 #
 # To run a single test, type:
-# $ python -m unittest test_slypi_tdms.TestSlycatWebClient.test_list_markings
+# $ python -m unittest test_slypi_tdms.TestSlyPITDMS.test_list_markings
+# or (from base directory):
+# $ python -m unittest tests.integration.test_slypi_tdms.TestSlyPITDMS.test_tdms_run_chart_singleton
 #
 # Modify SLYCAT_CONNECTION to use a different slycat server.
 # 
@@ -28,18 +30,24 @@ import slypi.dac.tdms_batches as dac_tdms_batches
 import slypi.dac.run_chart as run_chart
 
 # slycat connection parameters for localhost
-SLYCAT_CONNECTION = ['--host', 'https://localhost', 
-                     '--user', 'slycat', '--password', 'slycat',
-                     '--port', '9001', '--no-verify']
+# SLYCAT_CONNECTION = ['--host', 'https://localhost', 
+#                      '--user', 'slycat', '--password', 'slycat',
+#                      '--port', '9001', '--no-verify']
 
 # test marking for localhost
-TEST_MARKING = ['--marking', 'faculty']
+# TEST_MARKING = ['--marking', 'faculty']
 
 # qual server
-SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos', '--no-verify']
+SLYCAT_CONNECTION = ['--host', 'https://slycat-qual2.sandia.gov/', '--kerberos', ]
 
 # marking for qual
 TEST_MARKING = ['--marking', 'mna']
+
+# prod server
+# SLYCAT_CONNECTION = ['--host', 'https://slycat.sandia.gov/', '--kerberos', ]
+
+# marking for prod
+# TEST_MARKING = ['--marking', 'cui']
 
 # testing project name
 TEST_PROJECT = ['--project-name', 'Unit/Integration Testing']

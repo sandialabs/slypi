@@ -111,8 +111,8 @@ def main(arguments, connection):
   host = arguments.host
   if arguments.port:
       host = host + ":" + arguments.port
-  slypi.log.info("Your new CCA model is located at %s/models/%s" % (host, mid))
-  slypi.log.info('***** CCA Model Successfully Created *****')
+  print("Your new CCA model is located at %s/models/%s" % (host, mid))
+  print('***** CCA Model Successfully Created *****')
 
   return mid
 
