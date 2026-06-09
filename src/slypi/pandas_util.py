@@ -60,16 +60,15 @@ def parse_file(file, file_name=False):
     # parse attributes, dimensions of data frame
     dimensions = [dict(name="row", type="int64", begin=0, end=len(df.index))]
     attributes = [dict(name=header, type="float64" 
-        if df[header].dtype != "object" else "string") 
+        if (df[header].dtype == "float64" or df[header].dtype=="int64") else "string") 
         for header in df.columns]
     
     # parse data
     data = []
     inf_detected = False
     for header in df.columns.values:
-        if df[header].dtype == "str":
-            data.append(df[header].values.astype('unicode'))
-        else:
+        if df[header].dtype == "float64" or df[header].dtype == "int64":
+
             column = df[header].values.astype(float)
 
             # look for inf and replace with nan
@@ -79,7 +78,11 @@ def parse_file(file, file_name=False):
                 inf_detected = True
 
             data.append(column)
-            
+        
+        # anything except flaot64 is a string
+        else:
+            data.append(df[header].values.astype('unicode'))
+
     # check for empty headers (pandas replaced them with 'Unnamed: <Column #>')
     empty_headers = []
     headers = df.columns.values
@@ -124,8 +127,8 @@ def parse_file(file, file_name=False):
 
     # headers may have been changed, need to recompute
     attributes = [dict(name=header, type="float64" 
-        if df[header].dtype != "str" else "string") 
+        if (df[header].dtype == "float64" or df[header].dtype=="int64") else "string") 
         for header in df.columns]
-    
+
     # return data and errors
     return attributes, dimensions, data, csv_read_error
