@@ -61,7 +61,7 @@ To upload a parameter space model using the cars data to a Slycat server, use
 
 .. code-block:: bash
 
-  python -m slypi.ps.upload_csv example-data/cars.csv --marking uur  --project-name "PS Models"
+  python -m slypi.ps.upload_csv example-data/cars.csv --marking uur --project-name "PS Models"
 
 .. image:: images/ps-cars.png
   :width: 800

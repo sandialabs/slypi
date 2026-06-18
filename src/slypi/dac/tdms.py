@@ -147,17 +147,21 @@ def upload_model (arguments, parser, parms, file_list, progress=True):
             continue
 
         # update progress bar
-        model_progress[1] = round(model_progress[1])
-        if model_progress[1] > model_percent_done:
-            model_percent_done = model_progress[1]
-            slypi.print_progress_bar(model_percent_done, 100, prefix = "Processing (" +
-                                     model_progress[0] + '):',
-                                     suffix = 'Complete          ', length = 50)
-            # slypi.print_progress_bar(model_percent_done, 100, prefix = "Processing:",
-            #                          suffix = 'Complete', length = 50)
+        if model_progress[0] != 'Error':
+            model_progress[1] = round(model_progress[1])
+            if model_progress[1] > model_percent_done:
+                model_percent_done = model_progress[1]
+                slypi.print_progress_bar(model_percent_done, 100, prefix = "Processing (" +
+                                        model_progress[0] + '):',
+                                        suffix = 'Complete          ', length = 50)
+                # slypi.print_progress_bar(model_percent_done, 100, prefix = "Processing:",
+                #                          suffix = 'Complete', length = 50)
+        else:
+            slypi.print_progress_bar(100, 100, prefix = "Processing (Error):",
+                                    suffix = 'Complete          ', length = 50)
 
         # are we done?
-        if model_progress[0] == 'Done':
+        if model_progress[0] == 'Done' or model_progress[0] == 'Error':
             model_done = True
 
     return mid
